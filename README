@@ -1,1 +1,3 @@
-Some unsupervised learning modules using Torch
+Some unsupervised learning modules using Torch.
+
+In order to be able to use these modules, you need Torch7 (github.com/andresy/torch) and then get this repo into the dev directory of Torch7. When you remake Torch7 it will include all the modules defined here.
