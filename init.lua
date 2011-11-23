@@ -12,5 +12,5 @@ torch.include('unsup', 'LinearFista.lua')
 torch.include('unsup', 'FunctionCost.lua')
 torch.include('unsup', 'CriterionModule.lua')
 torch.include('unsup', 'L1Cost.lua')
-
+torch.include('unsup', 'test.lua')
 

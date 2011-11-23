@@ -1,5 +1,6 @@
 require 'lab'
 require 'unsup'
+require 'plot'
 
 random.manualSeed(123)
 math.randomseed(123)
@@ -37,8 +38,8 @@ ndist2,nind2,cc2=km2:run(x,nc,100)
 --print(km.dictionary:dist(km2.dictionary))
 
 for i=1,ndim-1,2 do
-   lab.plot({'data',x:select(2,i),x:select(2,i+1),'.'},
+   plot.plot({'data',x:select(2,i),x:select(2,i+1),'.'},
 	    {'centers',km2.dictionary:select(1,i),km2.dictionary:select(1,i+1),'+'})
-   lab.title('Dims ' .. i .. ' vs ' .. i+1)
+   plot.title('Dims ' .. i .. ' vs ' .. i+1)
    os.execute('sleep 2')
 end

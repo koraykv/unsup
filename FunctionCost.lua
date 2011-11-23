@@ -10,15 +10,15 @@ function FunctionCost:reset(stdv)
    self.module:reset(stdv)
 end
 
-function FunctionCost:forward(input, target)
+function FunctionCost:updateOutput(input, target)
    local mo = self.module:forward(input)
    self.output = self.cost:forward(mo,target)
    return self.output
 end
 
-function FunctionCost:backward(input, target)
-   local gi = self.cost:backward(self.module.output,target)
-   self.gradInput = self.module:backward(input,gi)
+function FunctionCost:updateGradInput(input, target)
+   local gi = self.cost:updateGradInput(self.module.output,target)
+   self.gradInput = self.module:updateGradInput(input,gi)
    return self.gradInput
 end
 
@@ -30,14 +30,3 @@ function FunctionCost:updateParameters(learningRate)
    self.module:updateParameters(learningRate)
 end
 
-function FunctionCost:write(file)
-   parent.write(self, file)
-   file:writeObject(self.module)
-   file:writeObject(self.cost)
-end
-
-function FunctionCost:read(file)
-   parent.read(self, file)
-   self.module = file:readObject()
-   self.cost = file:readObject()
-end

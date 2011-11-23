@@ -25,41 +25,14 @@ function SpatialBackConvolution:reset(stdv)
                      end)
 end
 
-function SpatialBackConvolution:forward(input)
-   return input.nn.SpatialBackConvolution_forward(self, input)
+function SpatialBackConvolution:updateOutput(input)
+   return input.nn.SpatialBackConvolution_updateOutput(self, input)
 end
 
-function SpatialBackConvolution:backward(input, gradOutput)
-   local gi = input.nn.SpatialBackConvolution_backward(self, input, gradOutput)
---    print('input', input:size())
---    print('ginput',gi:size())
---    print('output',self.output:size())
---    print('goutput',gradOutput:size())
---    print('weight',self.weight:size())
---    print('gweight',self.gradWeight:size())
-   return gi
+function SpatialBackConvolution:updateGradInput(input, gradOutput)
+   return input.nn.SpatialBackConvolution_updateGradInput(self, input, gradOutput)
+end
+function SpatialBackConvolution:accGradParameters(input, gradOutput, scale)
+   return input.nn.SpatialBackConvolution_accGradParameters(self, input, gradOutput, scale)
 end
 
-function SpatialBackConvolution:zeroGradParameters()
-   self.gradWeight:zero()
-end
-
-function SpatialBackConvolution:updateParameters(learningRate)
-   self.weight:add(-learningRate, self.gradWeight)
-end
-
-function SpatialBackConvolution:write(file)
-   parent.write(self, file)
-   file:writeInt(self.dW)
-   file:writeInt(self.dH)
-   file:writeObject(self.weight)
-   file:writeObject(self.gradWeight)
-end
-
-function SpatialBackConvolution:read(file)
-   parent.read(self, file)
-   self.dW = file:readInt()
-   self.dH = file:readInt()
-   self.weight = file:readObject()
-   self.gradWeight = file:readObject()
-end

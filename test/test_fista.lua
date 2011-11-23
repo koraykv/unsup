@@ -1,7 +1,7 @@
 
-require ('unsup')
+require 'unsup'
 require 'lab'
-dofile '../gnuplot.lua'
+require 'plot'
 
 lab.setgnuplotterminal('x11')
 
@@ -21,7 +21,7 @@ function doplots(v)
    istaf:close()
 
    lab.figure()
-   lab.plot({'fista ' .. v,gettableval(hfista,v)},{'ista ' .. v, gettableval(hista,v)})
+   plot.plot({'fista ' .. v,gettableval(hfista,v)},{'ista ' .. v, gettableval(hista,v)})
 end
 
 seed = seed or 123
@@ -61,13 +61,13 @@ end
 
 code,rec,h = fista:forward(x);
 
-lab.figure(1)
-lab.plot({'data',mixi,mixj,'+'},{'code',lab.linspace(1,no,no),code,'+'})
+plot.figure(1)
+plot.plot({'data',mixi,mixj,'+'},{'code',lab.linspace(1,no,no),code,'+'})
 lab.title('Fista = ' .. tostring(fista.fista.doFistaUpdate))
 
-lab.figure(2)
-lab.plot({'input',lab.linspace(1,ni,ni),x,'+-'},{'reconstruction',lab.linspace(1,ni,ni),rec,'+-'});
-lab.title('Reconstruction Error : ' ..  x:dist(rec) .. ' ' .. 'Fista = ' .. tostring(fista.fista.doFistaUpdate))
+plot.figure(2)
+plot.plot({'input',lab.linspace(1,ni,ni),x,'+-'},{'reconstruction',lab.linspace(1,ni,ni),rec,'+-'});
+plot.title('Reconstruction Error : ' ..  x:dist(rec) .. ' ' .. 'Fista = ' .. tostring(fista.fista.doFistaUpdate))
 --w2:axis(0,ni+1,-1,1)
 
 if fista.fista.doFistaUpdate then

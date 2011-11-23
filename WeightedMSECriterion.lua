@@ -6,24 +6,12 @@ function WeightedMSECriterion:__init(w)
    self.buffer = torch.Tensor()
 end
 
-function WeightedMSECriterion:forward(input,target)
+function WeightedMSECriterion:updateOutput(input,target)
    self.buffer:resizeAs(input):copy(target)
    self.buffer:cmul(self.weight)
-   return input.nn.MSECriterion_forward(self, input, self.buffer)
+   return input.nn.MSECriterion_updateOutput(self, input, self.buffer)
 end
 
-function WeightedMSECriterion:backward(input, target)
-   return input.nn.MSECriterion_backward(self, input, self.buffer)
+function WeightedMSECriterion:updateGradInput(input, target)
+   return input.nn.MSECriterion_updateGradInput(self, input, self.buffer)
 end
-
-function WeightedMSECriterion:write(file)
-   parent.write(self, file)
-   file:writeObject(self.weight)
-end
-
-function WeightedMSECriterion:read(file)
-   parent.read(self, file)
-   self.weight = file:readObject()
-   self.buffer = torch.Tensor()
-end
-
