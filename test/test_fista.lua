@@ -3,7 +3,8 @@ require 'unsup'
 require 'lab'
 require 'plot'
 
-lab.setgnuplotterminal('x11')
+plot.setgnuplotexe('/usr/bin/gnuplot44')
+plot.setgnuplotterminal('x11')
 
 function gettableval(tt,v)
    local x = torch.Tensor(#tt)
@@ -63,7 +64,7 @@ code,rec,h = fista:forward(x);
 
 plot.figure(1)
 plot.plot({'data',mixi,mixj,'+'},{'code',lab.linspace(1,no,no),code,'+'})
-lab.title('Fista = ' .. tostring(fista.fista.doFistaUpdate))
+plot.title('Fista = ' .. tostring(fista.fista.doFistaUpdate))
 
 plot.figure(2)
 plot.plot({'input',lab.linspace(1,ni,ni),x,'+-'},{'reconstruction',lab.linspace(1,ni,ni),rec,'+-'});

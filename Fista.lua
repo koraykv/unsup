@@ -13,18 +13,6 @@ function Fista:__init(F, G)
    self.doFistaUpdate = true
 end
 
-local function softshrink(v,alpha)
-   v:apply(function(x) 
-	      if x > alpha then
-		 return x - alpha
-	      elseif x < -alpha then
-		 return x + alpha
-	      else
-		 return 0
-	      end
-	   end)
-end
-
 function Fista:forward(input, code, lambda, maxiter, errthres)
 
    local xk = code
@@ -54,7 +42,7 @@ function Fista:forward(input, code, lambda, maxiter, errthres)
    while not converged and niter < self.maxiter do
 
       -- get derivatives from smooth function
-      local GFy = self.smoothFunc:backward(y,input)
+      local GFy = self.smoothFunc:updateGradInput(y,input)
       
       local Fply = 0
       local Gply = 0
@@ -69,7 +57,8 @@ function Fista:forward(input, code, lambda, maxiter, errthres)
 	 ply:copy(y)
 	 ply:add(-1/L,GFy)
 	 -- soft shrink
-	 softshrink(ply, lambda/L)
+	 ply:shrinkage(lambda/L);
+	 --softshrink(ply, lambda/L)
 	 xk:copy(ply) -- this is candidate for new current iteration
 	 -- evaluate this point F(ply)
 	 Fply = self.smoothFunc:forward(ply,input)

@@ -39,20 +39,20 @@ function LinearFista:forward(input)
    return self.code,self.fista.smoothFunc.module.output,h
 end
 
-function LinearFista:backward(input)
-   return self.fista:backward(input,self.code,self.lambda)
-end
+-- function LinearFista:backward(input)
+--    return self.fista:backward(input,self.code,self.lambda)
+-- end
 
-function LinearFista:write(file)
-   parent.write(self, file)
-   file:writeObject(self.fista)
-   file:writeDouble(self.lambda)
-   file:writeObject(self.code)
-end
+-- function LinearFista:write(file)
+--    parent.write(self, file)
+--    file:writeObject(self.fista)
+--    file:writeDouble(self.lambda)
+--    file:writeObject(self.code)
+-- end
 
-function LinearFista:read(file)
-   parent.read(self, file)
-   self.fista = file:readObject()
-   self.lambda = file:readDouble()
-   self.code = file:readObject()
-end
+-- function LinearFista:read(file)
+--    parent.read(self, file)
+--    self.fista = file:readObject()
+--    self.lambda = file:readDouble()
+--    self.code = file:readObject()
+-- end
