@@ -35,12 +35,12 @@ function Fista:forward(input, code, lambda, maxiter, errthres)
    local ply = torch.Tensor():resizeAs(y)         -- soft shrinked y
    y:copy(xkm)                                    -- fista location
 
-   -- run through smooth function (code is input, input is target)
-   local Fy = self.smoothFunc:forward(y,input)
    local Gy = self.nonSmoothFunc:forward(y)
    local F = math.huge
    while not converged and niter < self.maxiter do
 
+      -- run through smooth function (code is input, input is target)
+      local Fy = self.smoothFunc:forward(y,input)
       -- get derivatives from smooth function
       local GFy = self.smoothFunc:updateGradInput(y,input)
       
@@ -87,7 +87,7 @@ function Fista:forward(input, code, lambda, maxiter, errthres)
 	    L = L * self.Lstep
 	 end
 	 nline = nline + 1
-	 --print(linesearchdone,nline,L,Fy,Q2,Q3,Q,Fbeta,Gbeta)
+	 --print(niter, linesearchdone,nline,L,Fy,Q2,Q3,Q,Fply)
       end
       -- end line search
       ---------------------------------------------
