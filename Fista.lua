@@ -87,7 +87,9 @@ function Fista:forward(input, code, lambda, maxiter, errthres)
 	    L = L * self.Lstep
 	 end
 	 nline = nline + 1
-	 --print(niter, linesearchdone,nline,L,Fy,Q2,Q3,Q,Fply)
+	 if self.verbose then
+	    print(niter, linesearchdone,nline,L,Fy,Q2,Q3,Q,Fply)
+	 end
       end
       -- end line search
       ---------------------------------------------

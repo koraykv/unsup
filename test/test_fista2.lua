@@ -3,8 +3,8 @@ require 'unsup'
 require 'lab'
 require 'plot'
 
-plot.setgnuplotexe('/usr/bin/gnuplot44')
-plot.setgnuplotterminal('x11')
+-- plot.setgnuplotexe('/usr/bin/gnuplot44')
+-- plot.setgnuplotterminal('x11')
 
 function gettableval(tt,v)
    local x = torch.Tensor(#tt)
@@ -21,7 +21,7 @@ function doplots(v)
    local hista = istaf:readObject()
    istaf:close()
 
-   lab.figure()
+   plot.figure()
    plot.plot({'fista ' .. v,gettableval(hfista,v)},{'ista ' .. v, gettableval(hista,v)})
 end
 
@@ -41,12 +41,15 @@ x = torch.Tensor(ni):zero()
 
 --- I am keeping these just to make sure random init stays same
 fista = unsup.LinearFista(ni,no,0.1,200)
+fista = nil
 
 fistaparams = {}
 fistaparams.doFistaUpdate = dofista
 fistaparams.maxline = 10
+fistaparams.maxiter = 200
+fistaparams.verbose = true
 
-D=torch.Tensor(no,ni):copy(lab.randn(ni,no))
+D=lab.randn(ni,no)
 for i=1,D:size(2) do
    D:select(2,i):div(D:select(2,i):std()+1e-12)
 end
@@ -58,25 +61,25 @@ for i=1,nc do
    local cc = random.uniform(0,1/nc)
    mixi[i] = ii;
    mixj[i] = cc;
-   --fista.fista.smoothFunc.module.weight:select(2,ii):copy(lab.randn(ni))
    print(ii,cc)
-   x:add(cc, fista.fista.smoothFunc.module.weight:select(2,ii))
+   x:add(cc, D:select(2,ii))
 end
 
 code,h = unsup.FistaL1(x,D,0.1,fistaparams)
-rec = fistaparams.reconstruction:addmv(0,1,D,x)
+fistaparams.reconstruction:addmv(0,1,D,code)
+rec = fistaparams.reconstruction
 --code,rec,h = fista:forward(x);
 
 plot.figure(1)
 plot.plot({'data',mixi,mixj,'+'},{'code',lab.linspace(1,no,no),code,'+'})
-plot.title('Fista = ' .. tostring(dofista))
+plot.title('Fista = ' .. tostring(fistaparams.doFistaUpdate))
 
 plot.figure(2)
 plot.plot({'input',lab.linspace(1,ni,ni),x,'+-'},{'reconstruction',lab.linspace(1,ni,ni),rec,'+-'});
-plot.title('Reconstruction Error : ' ..  x:dist(rec) .. ' ' .. 'Fista = ' .. tostring(fista.fista.doFistaUpdate))
+plot.title('Reconstruction Error : ' ..  x:dist(rec) .. ' ' .. 'Fista = ' .. tostring(fistaparams.doFistaUpdate))
 --w2:axis(0,ni+1,-1,1)
 
-if fista.fista.doFistaUpdate then
+if dofista then
    print('Running FISTA')
    fname = 'fista2.bin'
 else

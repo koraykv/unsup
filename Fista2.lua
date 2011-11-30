@@ -1,90 +1,5 @@
 require 'torch'
 
-function unsup.FistaL1(input, D, lambda, params)
-
-   if D:dim() ~= 2 then
-      error ('Dictionary is supposed to 2D')
-   end
-   if x:dim() > 2 then
-      error ('input can be 1D for a single sample or 2D for a batch')
-   end
-   if x:dim() == 1 and x:size(1) ~= D:size(2) then
-      error ('input size should be same as row size of Dictionary')
-   end
-   if x:dim() == 2 and x:size(2) ~= D:size(2) then
-      error ('input size[2] should be same as row size of Dictionary')
-   end
-   local params = params or {}
-   -- related to FISTA
-   params.L = params.L or 0.1
-   params.Lstep = params.Lstep or 1.5
-   params.maxiter = params.maxiter or 50
-   params.maxline = params.maxline or 20
-   params.errthres = params.errthres or 1e-4
-   params.doFistaUpdate = params.doFistaUpdate or true
-   
-   -- temporary stuff that might be good to keep around
-   params.reconstruction = params.reconstruction or torch.Tensor()
-   params.gradf = params.gradf or torch.Tensor()
-   params.code = params.code or torch.Tensor()
-
-   -- resize temporary stuff
-   params.reconstruction:resizeAs(input)
-   if x:dim() == 2 then
-      params.code:resize(x:size(1),D:size(1))
-   else
-      params.code:resize(D:size(1))
-   end
-   params.gradf:resizeAs(params.code)
-
-   local temp = torch.Tensor()
-
-   -- CREATE FUNCTION CLOSURES
-   -- smooth function
-   local function f(x,mode)
-      -- function evaluation
-      if x:dim() == 1 then
-	 params.reconstruction:addmv(0,1,D,x)
-      else
-	 params.reconstruction:addmm(0,1,x,D:t())
-      end
-      local fval = input:dist(params.reconstruction)
-
-      -- derivative calculation
-      if mode and mode:match('dx') then
-	 params.reconstruction:add(-1,input):mul(2)
-	 params.gradf:resizeAs(x)
-	 if x:dim() == 1 then
-	    params.gradf:addmv(0,1,D:t(),params.reconstruction)
-	 else
-	    params.gradf:addmm(0,1,params.reconstruction, D)
-	 end
-	 return fval, params.gradf
-      end
-
-      return fval
-   end
-
-   -- non-smooth function L1
-   local function g(x)
-      temp:resizeAs(x)
-      lab.abs(temp,x)
-      return lambda*temp:sum()
-   end
-
-   -- argmin_x Q(x,y), just shrinkage for L1
-   local function pl(x,L,gfx)
-      x:add(-1/L,gfx)
-      x:shrinkage(lambda/L)
-   end
-
-   params.f = f
-   params.g = g
-   params.pl = pl
-
-   return unsup.FistaLS(f, g, pl, params.code, params)
-end
-
 -- FISTA with backtracking line search
 -- f  smooth function
 -- g  non-smooth function
@@ -120,9 +35,9 @@ function unsup.FistaLS(f, g, pl, xinit, params)
    while not converged and niter < maxiter do
 
       -- run through smooth function (code is input, input is target)
-      local fy = f(y)
       -- get derivatives from smooth function
-      local gfy = df(y)
+      local fy,gfy = f(y,'dx')
+      --local gfy = f(y)
       
       local fply = 0
       local gply = 0
@@ -135,16 +50,13 @@ function unsup.FistaLS(f, g, pl, xinit, params)
       while not linesearchdone do
 	 -- take a step in gradient direction of smooth function
 	 ply:copy(y)
-	 --ply:add(-1/L,GFy)
-	 -- soft shrink
-	 --ply:shrinkage(lambda/L)
 	 pl(ply,L,gfy)
-	 xk:copy(ply) -- this is candidate for new current iteration
+
+	 -- this is candidate for new current iteration
+	 xk:copy(ply)
+
 	 -- evaluate this point F(ply)
 	 fply = f(ply)
-	 -- evaluate approximation Q(beta,y)
-	 -- non smooth function
-	 --Gply = lambda*self.nonSmoothFunc:forward(ply)
 
 	 -- ply - y
 	 ply:add(-1, y)
@@ -154,6 +66,7 @@ function unsup.FistaLS(f, g, pl, xinit, params)
 	 local Q3 = L/2 * ply:dot(ply)
 	 -- Q(beta,y) = F(y) + <beta-y , \Grad(F(y))> + L/2||beta-y||^2 + G(beta)
 	 Q = fy + Q2 + Q3
+
 	 -- check if F(beta) < Q(pl(y),\t)
 	 if fply <= Q then --and Fply + Gply <= F then
 	    linesearchdone = true
@@ -167,7 +80,9 @@ function unsup.FistaLS(f, g, pl, xinit, params)
 	    L = L * Lstep
 	 end
 	 nline = nline + 1
-	 --print(linesearchdone,nline,L,Fy,Q2,Q3,Q,Fbeta,Gbeta)
+	 if verbose then
+	    print(niter,linesearchdone,nline,L,fy,Q2,Q3,Q,fply)
+	 end
       end
       -- end line search
       ---------------------------------------------

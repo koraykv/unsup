@@ -3,7 +3,7 @@ require 'unsup'
 require 'lab'
 require 'plot'
 
-plot.setgnuplotexe('/usr/bin/gnuplot44')
+--plot.setgnuplotexe('/usr/bin/gnuplot44')
 plot.setgnuplotterminal('x11')
 
 function gettableval(tt,v)
@@ -21,7 +21,7 @@ function doplots(v)
    local hista = istaf:readObject()
    istaf:close()
 
-   lab.figure()
+   plot.figure()
    plot.plot({'fista ' .. v,gettableval(hfista,v)},{'ista ' .. v, gettableval(hista,v)})
 end
 

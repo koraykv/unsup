@@ -7,6 +7,7 @@ require 'libunsup'
 torch.include('unsup', 'Kmeans.lua')
 torch.include('unsup', 'SpatialBackConvolution.lua')
 torch.include('unsup', 'WeightedMSECriterion.lua')
+torch.include('unsup', 'FistaDrivers.lua')
 torch.include('unsup', 'Fista.lua')
 torch.include('unsup', 'Fista2.lua')
 torch.include('unsup', 'LinearFista.lua')
