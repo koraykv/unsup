@@ -6,6 +6,7 @@ SET(luasrc init.lua
   L1Cost.lua
   FunctionCost.lua 
   LinearFista.lua 
+  FistaDrivers.lua 
   Fista.lua 
   Fista2.lua 
   Kmeans.lua 
