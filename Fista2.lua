@@ -13,9 +13,16 @@ require 'torch'
 -- params.maxline : max number of line search iterations per iteration (20)
 -- params.errthres: Error thershold for convergence check (1e-4)
 -- params.doFistaUpdate : true : use FISTA, false: use ISTA (true)
--- params.verbose : sotre each iteration solution and print detailed info (false)
---
--- Returns the solution x and history of function evals, number of line search ,...
+-- params.verbose : store each iteration solution and print detailed info (false)
+-- 
+-- On output, params will contain these additional fields that can be reused.
+-- params.L       : last used L value will be written.
+-- These are temporary storages needed by the algo and if the same params object is 
+-- passed a second time, these same storages will be used without new allocation.
+-- params.xkm     : previous iterarion point
+-- params.y       : fista iteration
+-- params.ply     : ply = pl(y - 1/L grad(f))
+-- Returns the solution x and history of {function evals, number of line search ,...}
 function unsup.FistaLS(f, g, pl, xinit, params)
    
    local params = params or {}
@@ -26,13 +33,20 @@ function unsup.FistaLS(f, g, pl, xinit, params)
    local errthres = params.errthres or 1e-4
    local doFistaUpdate = params.doFistaUpdate
    local verbose = params.verbose 
-   
-   local xk = xinit
-   -- we start from all zeros
-   local xkm = torch.Tensor():resizeAs(xk):zero() -- previous iteration
-   local y = torch.Tensor():resizeAs(xk):zero()   -- fista iteration
-   local ply = torch.Tensor():resizeAs(y)         -- soft shrinked y
 
+   -- temporary allocations
+   params.xkm = params.xkm or torch.Tensor()
+   params.y   = params.y   or torch.Tensor()
+   params.ply = params.ply or torch.Tensor()
+   local xkm = params.xkm  -- previous iteration
+   local y   = params.y    -- fista iteration
+   local ply = params.ply  -- soft shrinked y
+
+   -- we start from all zeros
+   local xk = xinit
+   xkm:resizeAs(xk):zero()
+   ply:resizeAs(xk):zero()
+   y:resizeAs(xk):zero()
 
    local history = {} -- keep track of stuff
    local niter = 0    -- number of iterations done
@@ -111,6 +125,7 @@ function unsup.FistaLS(f, g, pl, xinit, params)
       history[niter].Fply = fply
       history[niter].Gply = gply
       history[niter].Q  = Q
+      params.L = L
       if verbose then
 	 history[niter].xk = xk:clone()
 	 history[niter].y  = y:clone()
@@ -135,7 +150,7 @@ function unsup.FistaLS(f, g, pl, xinit, params)
       if doFistaUpdate then
 	 -- do the FISTA step
 	 tkp = (1 + math.sqrt(1 + 4*tk*tk)) / 2
-	 -- x(k-1) = x(k-1) - x(k)
+	 -- x(k-1) = x(k-1) - 1;5Ax(k)
 	 xkm:add(-1,xk)
 	 -- y(k+1) = x(k) + (1-t(k)/t(k+1))*(x(k-1)-x(k))
 	 y:copy(xk)
