@@ -22,6 +22,11 @@ function FunctionCost:updateGradInput(input, target)
    return self.gradInput
 end
 
+function FunctionCost:accGradParameters(input, target)
+   local gi = self.cost:updateGradInput(self.module.output,target)
+   self.module:accGradParameters(input,gi)
+end
+
 function FunctionCost:zeroGradParameters()
    self.module:zeroGradParameters()
 end

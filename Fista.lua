@@ -149,27 +149,14 @@ function Fista:forward(input, code, lambda, maxiter, errthres)
 end
 
 -- input is data, code is sparse representation
-function Fista:backward(input, code, lambda)
+function Fista:updateGradInput(input, code, lambda)
    -- code is input to smoothFunc and input is the target for reconstruction
-   local gF = self.smoothFunc:backward(code, input)
-   local gG = self.nonSmoothFunc:backward(code)
+   local gF = self.smoothFunc:updateGradInput(code, input)
+   local gG = self.nonSmoothFunc:updateGradInput(code)
    gF:add(lambda,gG)
    return gF
 end
 
-function Fista:write(file)
-   file:writeBool(self.verbose)
-   file:writeDouble(self.L)
-   file:writeDouble(self.Lstep)
-   file:writeInt(self.maxiter)
-   file:writeDouble(self.errthres)
+function Fista:accGradParameters(input, code, lambda)
+   self.smoothFunc:accGradParameters(code)
 end
-
-function Fista:read(file)
-   self.verbose = file:readBool()
-   self.L = file:readDouble()
-   self.Lstep = file:readDouble()
-   self.maxiter = file:readInt()
-   self.errthres = file:readDouble()
-end
-

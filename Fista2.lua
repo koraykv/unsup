@@ -1,10 +1,21 @@
 require 'torch'
 
 -- FISTA with backtracking line search
+--
 -- f  smooth function
 -- g  non-smooth function
 -- pl minimizer of intermediate problem Q(x,y)
 -- xinit initial point
+-- params   : table of parameters (**optional**)
+-- params.L : 1/(step size) for ISTA/FISTA iteration (0.1)
+-- params.Lstep : step size multiplier at each iteration (1.5)
+-- params.maxiter : max number of iterations (50)
+-- params.maxline : max number of line search iterations per iteration (20)
+-- params.errthres: Error thershold for convergence check (1e-4)
+-- params.doFistaUpdate : true : use FISTA, false: use ISTA (true)
+-- params.verbose : sotre each iteration solution and print detailed info (false)
+--
+-- Returns the solution x and history of function evals, number of line search ,...
 function unsup.FistaLS(f, g, pl, xinit, params)
    
    local params = params or {}
@@ -50,7 +61,9 @@ function unsup.FistaLS(f, g, pl, xinit, params)
       while not linesearchdone do
 	 -- take a step in gradient direction of smooth function
 	 ply:copy(y)
-	 pl(ply,L,gfy)
+	 ply:add(-1/L,gfy)
+	 -- and solve for minimum of auxiliary problem
+	 pl(ply,L)
 
 	 -- this is candidate for new current iteration
 	 xk:copy(ply)

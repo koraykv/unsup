@@ -65,9 +65,11 @@ for i=1,nc do
    x:add(cc, D:select(2,ii))
 end
 
-code,h = unsup.FistaL1(x,D,0.1,fistaparams)
-fistaparams.reconstruction:addmv(0,1,D,code)
-rec = fistaparams.reconstruction
+fista = unsup.FistaL1(D,fistaparams)
+code,h = fista.run(x,0.1)
+
+fista.reconstruction:addmv(0,1,D,code)
+rec = fista.reconstruction
 --code,rec,h = fista:forward(x);
 
 plot.figure(1)
