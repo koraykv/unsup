@@ -76,15 +76,15 @@ function unsup.FistaLS(f, g, pl, xinit, params)
 	 -- take a step in gradient direction of smooth function
 	 ply:copy(y)
 	 ply:add(-1/L,gfy)
+
 	 -- and solve for minimum of auxiliary problem
 	 pl(ply,L)
-
 	 -- this is candidate for new current iteration
 	 xk:copy(ply)
 
 	 -- evaluate this point F(ply)
 	 fply = f(ply)
-
+	 
 	 -- ply - y
 	 ply:add(-1, y)
 	 -- <ply-y , \Grad(f(y))>
@@ -96,6 +96,8 @@ function unsup.FistaLS(f, g, pl, xinit, params)
 
 	 -- check if F(beta) < Q(pl(y),\t)
 	 if fply <= Q then --and Fply + Gply <= F then
+	    -- now evaluate G here
+	    gply = g(xk)
 	    linesearchdone = true
 	 elseif  nline >= maxline then
 	    linesearchdone = true
@@ -113,7 +115,6 @@ function unsup.FistaLS(f, g, pl, xinit, params)
       end
       -- end line search
       ---------------------------------------------
-      gply = g(xk)
       niter = niter + 1
 
       -- bookeeping
@@ -150,16 +151,14 @@ function unsup.FistaLS(f, g, pl, xinit, params)
       if doFistaUpdate then
 	 -- do the FISTA step
 	 tkp = (1 + math.sqrt(1 + 4*tk*tk)) / 2
-	 -- x(k-1) = x(k-1) - 1;5Ax(k)
+	 -- x(k-1) = x(k-1) - x(k)
 	 xkm:add(-1,xk)
 	 -- y(k+1) = x(k) + (1-t(k)/t(k+1))*(x(k-1)-x(k))
 	 y:copy(xk)
 	 y:add( (1-tk)/tkp , xkm)
 	 -- store for next iterations
 	 -- x(k-1) = x(k)
- 	 local t = xkm
- 	 xkm = xk
- 	 xk = t
+ 	 xkm:copy(xk)
       else
 	 y:copy(xk)
       end

@@ -69,12 +69,12 @@ function unsup.FistaL1(D, params)
 		   end
 		   ---------------------------------------
 		   -- return function value and derivative
-		   return fval, gradf
+		   return fval, gradf, reconstruction
 		end
 		
 		------------------------
 		-- return function value
-		return fval
+		return fval, reconstruction
 	     end
 
    -- non-smooth function L1
