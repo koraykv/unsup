@@ -68,7 +68,7 @@ end
 fista = unsup.FistaL1(D,fistaparams)
 code,h = fista.run(x,0.1)
 
-fista.reconstruction:addmv(0,1,D,code)
+--fista.reconstruction:addmv(0,1,D,code)
 rec = fista.reconstruction
 --code,rec,h = fista:forward(x);
 

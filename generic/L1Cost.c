@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/L1Cost.c"
 #else
 
-static int nn_(L1Cost_forward)(lua_State *L)
+static int nn_(L1Cost_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   accreal sum;
@@ -18,7 +18,7 @@ static int nn_(L1Cost_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(L1Cost_backward)(lua_State *L)
+static int nn_(L1Cost_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
@@ -31,8 +31,8 @@ static int nn_(L1Cost_backward)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(L1Cost__) [] = {
-  {"L1Cost_forward", nn_(L1Cost_forward)},
-  {"L1Cost_backward", nn_(L1Cost_backward)},
+  {"L1Cost_updateOutput", nn_(L1Cost_updateOutput)},
+  {"L1Cost_updateGradInput", nn_(L1Cost_updateGradInput)},
   {NULL, NULL}
 };
 

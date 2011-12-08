@@ -30,6 +30,7 @@ function unsup.FistaL1(D, params)
    -- temporary stuff that might be good to keep around
    fista.reconstruction = torch.Tensor()
    fista.gradf = torch.Tensor()
+   fista.gradg = torch.Tensor()
    fista.code = torch.Tensor()
 
    -- these will be assigned in run(x)
@@ -44,7 +45,6 @@ function unsup.FistaL1(D, params)
 
 		local reconstruction = fista.reconstruction
 		local input = fista.input
-		local gradf = fista.gradf
 		-- -------------------
 		-- function evaluation
 		if x:dim() == 1 then
@@ -60,6 +60,7 @@ function unsup.FistaL1(D, params)
 		-- ----------------------
 		-- derivative calculation
 		if mode and mode:match('dx') then
+		   local gradf = fista.gradf
 		   reconstruction:add(-1,input):mul(2)
 		   gradf:resizeAs(x)
 		   if input:dim() == 1 then
@@ -79,7 +80,16 @@ function unsup.FistaL1(D, params)
 
    -- non-smooth function L1
    fista.g =  function (x)
-		 return fista.lambda*x:norm(1)
+
+		 local fval = fista.lambda*x:norm(1)
+
+		 if mod and mode:match('dx') then
+		    local gradg = fista.gradg
+		    gradg:resizAs(x)
+		    gradg:sign():mul(fista.lambda)
+		    return fval,gradg
+		 end
+		 return fval
 	      end
    
    -- argmin_x Q(x,y), just shrinkage for L1

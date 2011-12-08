@@ -4,18 +4,11 @@ function L1Cost:__init()
    parent.__init(self)
 end
 
-function L1Cost:forward(input)
-   return input.nn.L1Cost_forward(self,input)
+function L1Cost:updateOutput(input)
+   return input.nn.L1Cost_updateOutput(self,input)
 end
 
-function L1Cost:backward(input)
-   return input.nn.L1Cost_backward(self,input)
+function L1Cost:updateGradInput(input)
+   return input.nn.L1Cost_updateGradInput(self,input)
 end
 
-function L1Cost:write(file)
-   parent.write(self, file)
-end
-
-function L1Cost:read(file)
-   parent.read(self, file)
-end
