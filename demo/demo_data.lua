@@ -33,16 +33,143 @@ function getdata(datafile, inputsize, std)
 	    print('Image ' .. i .. ' ri= ' .. ri .. ' ci= ' .. ci .. ' std= ' .. patchstd)
 	 end
 	 if patchstd > std then
-	    return patch,i
+	    if data_verbose then
+	       print(patch:min(),patch:max())
+	    end
+	    return patch,i,im
 	 end
       end
    end
 
    local dsample = torch.Tensor(inputsize*inputsize)
    setmetatable(dataset, {__index = function(self, index)
-				       local sample = self:selectPatch(inputsize, inputsize)
+				       local sample,i,im = self:selectPatch(inputsize, inputsize)
 				       dsample:copy(sample)
-				       return {dsample}
+				       return {dsample,dsample,im}
+				    end})
+   return dataset
+end
+
+function getdatacam(inputsize, std)
+   require 'camera'
+   local frow = 60
+   local fcol = 80
+   local gs = 5
+   local cam = image.Camera{width=fcol,height=frow}
+   local dataset ={}
+   local counter = 1
+
+   local std = std or 0.2
+   local nsamples = 10000
+   local gfh = image.gaussian{width=gs,height=1,normalize=true}
+   local gfv = image.gaussian{width=1,height=gs,normalize=true}
+   local gf = image.gaussian{width=gs,height=gs,normalize=true}
+
+   function dataset:size()
+      return nsamples
+   end
+
+
+   local imsq = torch.Tensor()
+   local lmnh = torch.Tensor()
+   local lmn = torch.Tensor()
+   local lmnsqh = torch.Tensor()
+   local lmnsq = torch.Tensor()
+   local lvar = torch.Tensor()
+   local function lcn(im)
+      local mn = im:mean()
+      local std = im:std()
+      if data_verbose then
+	 print('im',mn,std,im:min(),im:max())
+      end
+      im:add(-mn)
+      im:div(std)
+      if data_verbose then
+	 print('im',im:min(),im:max(),im:mean(), im:std())
+      end
+
+      imsq:resizeAs(im):copy(im):cmul(im)
+      if data_verbose then
+	 print('imsq',imsq:min(),imsq:max())
+      end
+
+      lab.conv2(lmnh,im,gfh)
+      lab.conv2(lmn,lmnh,gfv)
+      if data_verbose then
+	 print('lmn',lmn:min(),lmn:max())
+      end
+
+      --local lmn = lab.conv2(im,gf)
+      lab.conv2(lmnsqh,imsq,gfh)
+      lab.conv2(lmnsq,lmnsqh,gfv)
+      if data_verbose then	 
+	 print('lmnsq',lmnsq:min(),lmnsq:max())
+      end
+
+      lvar:resizeAs(lmn):copy(lmn):cmul(lmn)
+      lvar:mul(-1)
+      lvar:add(lmnsq)
+      if data_verbose then      
+	 print('2',lvar:min(),lvar:max())
+      end
+
+      lvar:apply(function (x) if x<0 then return 0 else return x end end)
+      if data_verbose then
+	 print('2',lvar:min(),lvar:max())
+      end
+
+      local lstd = lvar
+      lstd:sqrt()
+      lstd:apply(function (x) if x<1 then return 1 else return x end end)
+      if data_verbose then
+	 print('lstd',lstd:min(),lstd:max())
+      end
+
+      local shift = (gs+1)/2
+      local nim = im:narrow(1,shift,im:size(1)-(gs-1)):narrow(2,shift,im:size(2)-(gs-1))
+      nim:add(-1,lmn)
+      nim:cdiv(lstd)
+      if data_verbose then
+	 print('nim',nim:min(),nim:max())
+      end
+
+      return nim
+   end
+
+   function dataset:selectPatch(nr,nc)
+      local imageok = false
+      if simdata_verbose then
+	 print('selectPatch')
+      end
+      counter = counter + 1
+      local imgray = image.rgb2y(cam:forward())
+
+      local nim = lcn(imgray[1]:clone())
+      while not imageok do
+
+	 -- select some patch for original that contains original + pos
+	 local ri = math.ceil(random.uniform(1e-12,nim:size(1)-nr))
+	 local ci = math.ceil(random.uniform(1e-12,nim:size(2)-nc))
+	 local patch = nim:narrow(1,ri,nr)
+	 patch = patch:narrow(2,ci,nc)
+	 local patchstd = patch:std()
+	 if data_verbose then
+	    print('Image ' .. 0 .. ' ri= ' .. ri .. ' ci= ' .. ci .. ' std= ' .. patchstd)
+	 end
+	 if patchstd > std then
+	    if data_verbose then
+	       print(patch:min(),patch:max())
+	    end
+	    return patch,i,nim
+	 end
+      end
+   end
+
+   local dsample = torch.Tensor(inputsize*inputsize)
+   setmetatable(dataset, {__index = function(self, index)
+				       local sample,i,im = self:selectPatch(inputsize, inputsize)
+				       dsample:copy(sample)
+				       return {dsample,dsample,im}
 				    end})
    return dataset
 end
