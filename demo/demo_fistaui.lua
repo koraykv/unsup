@@ -98,7 +98,7 @@ function train(module,dataset)
    
    local err = 0
    local iter = 0
-   local ww = qtwidget.newwindow(800,600)
+   local ww = qtwidget.newwindow(800,300)
    
    for t = 1,params.maxiter do
 
