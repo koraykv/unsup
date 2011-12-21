@@ -1,6 +1,7 @@
 require 'unsup'
 require 'image'
 require 'plot'
+require 'paths'
 require 'qtwidget'
 
 --torch.setdefaulttensortype('torch.FloatTensor')
@@ -53,6 +54,10 @@ random.manualSeed(params.seed)
 if params.cam then
    data = getdatacam(params.inputsize)
 else
+   if not paths.filep(datafile) then
+      print('Datafile does not exist : ' .. params.datafile)
+      print('You can get sample datafile from http://cs.nyu.edu/~koray/publis/code/tr-berkeley-N5K-M56x56-lcn.bin')
+   end
    data = getdata(params.datafile, params.inputsize)
 end
 
@@ -110,7 +115,7 @@ function train(module,dataset)
 	 ww:setfontsize(25)
 	 ww:show("Torch 7: Unsupervised Training with Sparse Coding",10,15,800,100)
 	 ww:setfontsize(12)
-	 print('plotting')
+	 --print('plotting')
 	 image.display{win=ww,image=example[3],x=10,y=60,zoom=2, symmetric=true}
 	 image.display{win=ww,image=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symetric=true,x=example[3]:size(2)*2+30, y=60,zoom=3}
 
