@@ -49,7 +49,11 @@ random.manualSeed(params.seed)
 data = getdata(params.datafile, params.inputsize)
 
 -- creat unsup stuff
-mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
+if params.inputsize == params.kernelsize then
+   mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
+else
+   mlp = unsup.SpatialConvFistaL1(params.nfiltersin, params.nfiltersout, params.kernelsize, params.kernelsize, params.inputsize, params.inputsize, params.lambda)
+end
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 local Linear = torch.getmetatable("nn.Linear")
@@ -63,6 +67,18 @@ function Linear:zeroGradParameters()
    self.gradWeight:mul(params.momentum)
    self.gradBias:mul(params.momentum)
 end
+
+local SpatialBackConvolution = torch.getmetatable("nn.SpatialBackConvolution")
+local oldSpatialBackConvolutionUpdateParameters = SpatialBackConvolution.updateParameters
+function SpatialBackConvolution:updateParameters(learningRate)
+   oldSpatialBackConvolutionUpdateParameters(self, learningRate/(self.kW*self.kH*self.nInputPlane))
+end
+local oldSpatialBackConvolutionZeroGradParameters = SpatialBackConvolution.zeroGradParameters
+function SpatialBackConvolution:zeroGradParameters()
+   self.gradWeight:mul(momentum)
+   self.gradBias:mul(momentum)
+end
+
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -115,7 +131,12 @@ function train(module,dataset)
 	 plot.closeall()
 
 	 -- plot filters
-	 local dd = image.toDisplayTensor{input=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}
+	 local dd
+	 if mlp.D.weight:dim() == 2 then
+	    dd = image.toDisplayTensor{input=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}
+	 else
+	    dd = image.toDisplayTensor{input=mlp.D.weight,padding=1,nrow=8,symmetric=true}
+	 end
 	 image.saveJPG(params.rundir .. '/filters_' .. t .. '.jpg',dd)
 	 
 	 -- store model
