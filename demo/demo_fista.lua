@@ -49,11 +49,11 @@ random.manualSeed(params.seed)
 data = getdata(params.datafile, params.inputsize)
 
 -- creat unsup stuff
-if params.inputsize == params.kernelsize then
-   mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
-else
-   mlp = unsup.SpatialConvFistaL1(params.nfiltersin, params.nfiltersout, params.kernelsize, params.kernelsize, params.inputsize, params.inputsize, params.lambda)
-end
+--if params.inputsize == params.kernelsize then
+--   mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
+--else
+mlp = unsup.SpatialConvFistaL1(params.nfiltersin, params.nfiltersout, params.kernelsize, params.kernelsize, params.inputsize, params.inputsize, params.lambda)
+--end
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 local Linear = torch.getmetatable("nn.Linear")
@@ -75,8 +75,8 @@ function SpatialBackConvolution:updateParameters(learningRate)
 end
 local oldSpatialBackConvolutionZeroGradParameters = SpatialBackConvolution.zeroGradParameters
 function SpatialBackConvolution:zeroGradParameters()
-   self.gradWeight:mul(momentum)
-   self.gradBias:mul(momentum)
+   self.gradWeight:mul(params.momentum)
+   --self.gradBias:mul(momentum)
 end
 
 

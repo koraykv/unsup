@@ -177,7 +177,7 @@ function SpatialConvFistaL1:__init(inputFeatures, outputFeatures, kw, kh, iw, ih
    -- this is going to be set at each forward call.
    self.input = nil
    -- this is going to be passed to unsup.FistaLS
-   self.code = torch.Tensor(outputSize):fill(0)
+   self.code = torch.Tensor(outputFeatures, utt:size(1),utt:size(2)):fill(0)
 
    -- Now I need a function to pass along as f
    -- input is code, do reconstruction, calculate cost
@@ -233,7 +233,7 @@ end
 
 function SpatialConvFistaL1:reset(stdv)
    self.D:reset(stdv)
-   self.D.bias:fill(0)
+   --self.D.bias:fill(0)
 end
 
 function SpatialConvFistaL1:parameters()
@@ -262,6 +262,7 @@ end
 -- d(||Ax-b||+lam||x||_1)/dx
 function SpatialConvFistaL1:updateGradInput(input)
    -- calculate grad wrt to (x) which is code.
+   print(self.gradInput)
    if self.gradInput then
       local fval, gradf = self.fista.f(self.code,'dx')
       local gval, gradg = self.fista.g(self.code,'dx')
