@@ -1,30 +1,37 @@
 require 'nn'
 
-local LinearFistaL1, parent = torch.class('unsup.LinearFistaL1','nn.Module')
-
-
--- inputSize   : size of input
--- outputSize  : size of code
--- lambda      : sparsity coefficient
--- params      : unsup.FistaLS parameters
-function LinearFistaL1:__init(inputSize, outputSize, lambda, params)
+local SpatialConvFistaL1, parent = torch.class('unsup.SpatialConvFistaL1','nn.Module')
+-- inputFeatures   : number of input features
+-- outputFeatures  : size of code (feature maps)
+-- kw              : width of convolutional kernel
+-- kh              : height of convolutional kernel
+-- iw              : width of input patches
+-- ih              : height of input patches
+-- lambda          : sparsity coefficient
+-- params          : unsup.FistaLS parameters
+function SpatialConvFistaL1:__init(inputFeatures, outputFeatures, kw, kh, iw, ih, lambda, params)
 
    parent.__init(self)
 
    -- sparsity coefficient
    self.lambda = lambda
    -- dictionary is a linear layer so that I can train it
-   self.D = nn.Linear(outputSize, inputSize)
-   -- L2 reconstruction cost
-   self.Fcost = nn.MSECriterion()
+   self.D = nn.SpatialBackConvolution(outputFeatures, inputFeatures, kw, kh, 1, 1)
+   -- L2 reconstruction cost with weighting
+   local tt = torch.Tensor(ih,iw)
+   local utt= tt:unfold(1,kh,1):unfold(2,kw,1)
+   tt:zero()
+   utt:add(1)
+   tt:div(tt:max())
+   self.Fcost = nn.WeightedMSECriterion(tt)
    self.Fcost.sizeAverage = false;
-   -- L1 sparsity cosr
+   -- L1 sparsity cost
    self.Gcost = nn.L1Cost()
 
    -- this is going to be set at each forward call.
    self.input = nil
    -- this is going to be passed to unsup.FistaLS
-   self.code = torch.Tensor(outputSize):fill(0)
+   self.code = torch.Tensor(outputFeatures, utt:size(1),utt:size(2)):fill(0)
 
    -- Now I need a function to pass along as f
    -- input is code, do reconstruction, calculate cost
@@ -74,21 +81,21 @@ function LinearFistaL1:__init(inputSize, outputSize, lambda, params)
    self.params.errthres = self.params.errthres or 1e-4
    self.params.doFistaUpdate = true
 
-   self.gradInput = nil
    self:reset()
+   self.gradInput = nil
 end
 
-function LinearFistaL1:reset(stdv)
+function SpatialConvFistaL1:reset(stdv)
    self.D:reset(stdv)
-   self.D.bias:fill(0)
+   --self.D.bias:fill(0)
 end
 
-function LinearFistaL1:parameters()
+function SpatialConvFistaL1:parameters()
    return {self.D.weight},{self.D.gradWeight}
 end
 
 -- we do inference in forward
-function LinearFistaL1:updateOutput(input)
+function SpatialConvFistaL1:updateOutput(input)
    self.input = input
    -- init code to all zeros
    self.code:fill(0)
@@ -107,7 +114,7 @@ end
 
 -- no grad output, because we are unsup
 -- d(||Ax-b||+lam||x||_1)/dx
-function LinearFistaL1:updateGradInput(input)
+function SpatialConvFistaL1:updateGradInput(input)
    -- calculate grad wrt to (x) which is code.
    if self.gradInput then
       local fval, gradf = self.fista.f(self.code,'dx')
@@ -117,31 +124,26 @@ function LinearFistaL1:updateGradInput(input)
    return self.gradInput
 end
 
-function LinearFistaL1:zeroGradParameters()
+function SpatialConvFistaL1:zeroGradParameters()
    self.D:zeroGradParameters()
 end
 
 -- no grad output, because we are unsup
 -- d(||Ax-b||+lam||x||_1)/dA
-function LinearFistaL1:accGradParameters(input)
+function SpatialConvFistaL1:accGradParameters(input)
    self.Fcost:updateGradInput(self.D.output,input)
    self.D:accGradParameters(self.code, self.Fcost.gradInput)
-   self.D.gradBias:fill(0)
 end
 
-function LinearFistaL1:normalize()
-   -- normalize the dictionary
-end
-
-function LinearFistaL1:updateParameters(learningRate)
+function SpatialConvFistaL1:updateParameters(learningRate)
    self.D:updateParameters(learningRate)
    -- normalize the dictionary
    local w = self.D.weight
-   for i=1,w:size(2) do
-      w:select(2,i):div(w:select(2,i):norm()+1e-12)
+   for i=1,w:size(1) do
+      for j=1,w:size(2) do
+	 local k=w:select(1,i):select(1,j)
+	 k:div(k:norm()+1e-12)
+      end
    end
-   self.D.bias:fill(0)
+   --self.D.bias:fill(0)
 end
-
-
-

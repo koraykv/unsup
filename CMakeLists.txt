@@ -6,6 +6,7 @@ SET(luasrc init.lua
   L1Cost.lua
   FunctionCost.lua 
   LinearFista.lua 
+  SpatialConvFista.lua 
   UnsupModule.lua 
   FistaDrivers.lua 
   Fista.lua 

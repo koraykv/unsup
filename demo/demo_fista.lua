@@ -50,10 +50,12 @@ data = getdata(params.datafile, params.inputsize)
 
 -- creat unsup stuff
 --if params.inputsize == params.kernelsize then
---   mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
+-- mlplin = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
 --else
 mlp = unsup.SpatialConvFistaL1(params.nfiltersin, params.nfiltersout, params.kernelsize, params.kernelsize, params.inputsize, params.inputsize, params.lambda)
+-- mlp.D.weight:copy(mlplin.D.weight:t():clone())
 --end
+--mlp = mlplin
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 local Linear = torch.getmetatable("nn.Linear")
@@ -76,9 +78,7 @@ end
 local oldSpatialBackConvolutionZeroGradParameters = SpatialBackConvolution.zeroGradParameters
 function SpatialBackConvolution:zeroGradParameters()
    self.gradWeight:mul(params.momentum)
-   --self.gradBias:mul(momentum)
 end
-
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -90,11 +90,15 @@ function train(module,dataset)
    local currentLearningRate = params.eta
 
    local function updateSample(input, target, eta)
-      local err,h = module:forward(input, target)
+      local err,h = module:updateOutput(input, target)
       module:zeroGradParameters()
+      --print(1,module.D.gradWeight:norm())
       module:updateGradInput(input, target)
+      --print(2,module.D.gradWeight:norm())
       module:accGradParameters(input, target)
+      --print(3,module.D.gradWeight:norm())
       module:updateParameters(eta)
+      --print(4,module.D.weight:sum())
       return err, #h
    end
 
