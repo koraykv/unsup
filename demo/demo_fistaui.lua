@@ -110,65 +110,65 @@ function train(module,dataset)
       iter = iter + siter
 
       if math.fmod(t, 100) == 0 then
-	 ww:gbegin()
-	 ww:showpage()
-	 ww:setfontsize(25)
-	 ww:show("Torch 7: Unsupervised Training with Sparse Coding",10,15,800,100)
-	 ww:setfontsize(12)
-	 --print('plotting')
-	 image.display{win=ww,image=example[3],x=10,y=60,zoom=2, symmetric=true}
-	 image.display{win=ww,image=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symetric=true,x=example[3]:size(2)*2+30, y=60,zoom=3}
+         ww:gbegin()
+         ww:showpage()
+         ww:setfontsize(25)
+         ww:show("Torch 7: Unsupervised Training with Sparse Coding",10,15,800,100)
+         ww:setfontsize(12)
+         --print('plotting')
+         image.display{win=ww,image=example[3],x=10,y=60,zoom=2, symmetric=true}
+         image.display{win=ww,image=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symetric=true,x=example[3]:size(2)*2+30, y=60,zoom=3}
 
-	 ww:show(string.format('%6.2f : %6.2f',example[3]:min(), example[3]:max()), 10, 60+example[3]:size(1)*2+5,100, 20)
-	 ww:show(string.format('%6.2f : %6.2f',mlp.D.weight:min(), mlp.D.weight:max()),example[3]:size(2)*2+30,60+120,100,20)
-	 ww:gend()
+         ww:show(string.format('%6.2f : %6.2f',example[3]:min(), example[3]:max()), 10, 60+example[3]:size(1)*2+5,100, 20)
+         ww:show(string.format('%6.2f : %6.2f',mlp.D.weight:min(), mlp.D.weight:max()),example[3]:size(2)*2+30,60+120,100,20)
+         ww:gend()
       end
       
       if math.fmod(t , params.statinterval) == 0 then
-	 avTrainingError[t/params.statinterval] = err/params.statinterval
-	 avFistaIterations[t/params.statinterval] = iter/params.statinterval
+         avTrainingError[t/params.statinterval] = err/params.statinterval
+         avFistaIterations[t/params.statinterval] = iter/params.statinterval
 
-	 -- report
-	 print('# iter=' .. t .. ' eta = ' .. currentLearningRate .. ' current error = ' .. err)
+         -- report
+         print('# iter=' .. t .. ' eta = ' .. currentLearningRate .. ' current error = ' .. err)
 
--- 	 -- plot training error
--- 	 plot.pngfigure(params.rundir .. '/error.png')
--- 	 plot.plot(avTrainingError:narrow(1,1,math.max(t/params.statinterval,2)))
--- 	 plot.title('Training Error')
--- 	 plot.xlabel('# iterations / ' .. params.statinterval)
--- 	 plot.ylabel('Cost')
--- 	 -- plot training error
--- 	 plot.pngfigure(params.rundir .. '/iter.png')
--- 	 plot.plot(avFistaIterations:narrow(1,1,math.max(t/params.statinterval,2)))
--- 	 plot.title('Fista Iterations')
--- 	 plot.xlabel('# iterations / ' .. params.statinterval)
--- 	 plot.ylabel('Fista Iterations')
--- 	 plot.plotflush()
--- 	 plot.closeall()
+         -- 	 -- plot training error
+         -- 	 plot.pngfigure(params.rundir .. '/error.png')
+         -- 	 plot.plot(avTrainingError:narrow(1,1,math.max(t/params.statinterval,2)))
+         -- 	 plot.title('Training Error')
+         -- 	 plot.xlabel('# iterations / ' .. params.statinterval)
+         -- 	 plot.ylabel('Cost')
+         -- 	 -- plot training error
+         -- 	 plot.pngfigure(params.rundir .. '/iter.png')
+         -- 	 plot.plot(avFistaIterations:narrow(1,1,math.max(t/params.statinterval,2)))
+         -- 	 plot.title('Fista Iterations')
+         -- 	 plot.xlabel('# iterations / ' .. params.statinterval)
+         -- 	 plot.ylabel('Fista Iterations')
+         -- 	 plot.plotflush()
+         -- 	 plot.closeall()
 
--- 	 -- plot filters
--- 	 local dd = image.toDisplayTensor{input=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}
--- 	 image.saveJPG(params.rundir .. '/filters_' .. t .. '.jpg',dd)
-	 
--- 	 -- store model
--- 	 local mf = torch.DiskFile(params.rundir .. '/model_' .. t .. '.bin','w'):binary()
--- 	 mf:writeObject(module)
--- 	 mf:close()
+         -- 	 -- plot filters
+         -- 	 local dd = image.toDisplayTensor{input=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}
+         -- 	 image.saveJPG(params.rundir .. '/filters_' .. t .. '.jpg',dd)
 
--- 	 -- write training error
--- 	 local tf = torch.DiskFile(params.rundir .. '/error.mat','w'):binary()
--- 	 tf:writeObject(avTrainingError:narrow(1,1,t/params.statinterval))
--- 	 tf:close()
+         -- 	 -- store model
+         -- 	 local mf = torch.DiskFile(params.rundir .. '/model_' .. t .. '.bin','w'):binary()
+         -- 	 mf:writeObject(module)
+         -- 	 mf:close()
 
--- 	 -- write # of iterations
--- 	 local ti = torch.DiskFile(params.rundir .. '/iter.mat','w'):binary()
--- 	 ti:writeObject(avFistaIterations:narrow(1,1,t/params.statinterval))
--- 	 ti:close()
+         -- 	 -- write training error
+         -- 	 local tf = torch.DiskFile(params.rundir .. '/error.mat','w'):binary()
+         -- 	 tf:writeObject(avTrainingError:narrow(1,1,t/params.statinterval))
+         -- 	 tf:close()
 
-	 -- update learning rate with decay
-	 currentLearningRate = params.eta/(1+(t/params.statinterval)*params.decay)
-	 err = 0
-	 iter = 0
+         -- 	 -- write # of iterations
+         -- 	 local ti = torch.DiskFile(params.rundir .. '/iter.mat','w'):binary()
+         -- 	 ti:writeObject(avFistaIterations:narrow(1,1,t/params.statinterval))
+         -- 	 ti:close()
+
+         -- update learning rate with decay
+         currentLearningRate = params.eta/(1+(t/params.statinterval)*params.decay)
+         err = 0
+         iter = 0
       end
    end
 end
