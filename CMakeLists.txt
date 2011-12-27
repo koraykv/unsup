@@ -2,15 +2,14 @@
 SET(src init.c)
 
 SET(luasrc init.lua 
+  CriterionModule.lua
   SpatialFullConvolution.lua 
   WeightedMSECriterion.lua
   L1Cost.lua
   LinearFistaL1.lua 
   SpatialConvFistaL1.lua 
-  Kmeans.lua 
   test/test.lua
-  test/test_conv.lua
-  test/test_km.lua
+  test/test_module.lua
   test/test_fista.lua
   )
 
