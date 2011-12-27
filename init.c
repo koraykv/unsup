@@ -13,7 +13,7 @@ static const void* torch_LongTensor_id = NULL;
 #include "generic/Kmeans.c"
 #include "THGenerateFloatTypes.h"
 
-#include "generic/SpatialBackConvolution.c"
+#include "generic/SpatialFullConvolution.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/L1Cost.c"
@@ -35,8 +35,8 @@ DLL_EXPORT int luaopen_libunsup(lua_State *L)
   unsup_FloatKmeans_init(L);
   unsup_DoubleKmeans_init(L);
 
-  nn_FloatSpatialBackConvolution_init(L);
-  nn_DoubleSpatialBackConvolution_init(L);
+  nn_FloatSpatialFullConvolution_init(L);
+  nn_DoubleSpatialFullConvolution_init(L);
 
   nn_FloatL1Cost_init(L);
   nn_DoubleL1Cost_init(L);

@@ -6,7 +6,7 @@ local precision = 1e-5
 
 local nntest = {}
 
-function nntest.SpatialBackConvolution()
+function nntest.SpatialFullConvolution()
    local from = math.random(2,5)
    local to = math.random(2,7)
    local ki = math.random(2,7)
@@ -15,7 +15,7 @@ function nntest.SpatialBackConvolution()
    local sj = math.random(1,3)
    local ini = math.random(10,13)
    local inj = math.random(10,13)
-   local module = nn.SpatialBackConvolution(from, to, ki, kj, si, sj)
+   local module = nn.SpatialFullConvolution(from, to, ki, kj, si, sj)
    local input = torch.Tensor(from, inj, ini):zero()
    
    local err = jac.testJacobian(module, input)

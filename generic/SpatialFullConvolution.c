@@ -1,9 +1,9 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/SpatialBackConvolution.c"
+#define TH_GENERIC_FILE "generic/SpatialFullConvolution.c"
 #else
 
 
-static int nn_(SpatialBackConvolution_updateOutput)(lua_State *L)
+static int nn_(SpatialFullConvolution_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int dW = luaT_getfieldcheckint(L, 1, "dW");
@@ -23,7 +23,7 @@ static int nn_(SpatialBackConvolution_updateOutput)(lua_State *L)
 }
 
 
-static int nn_(SpatialBackConvolution_updateGradInput)(lua_State *L)
+static int nn_(SpatialFullConvolution_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
@@ -42,7 +42,7 @@ static int nn_(SpatialBackConvolution_updateGradInput)(lua_State *L)
   return 1;
 }
 
-static int nn_(SpatialBackConvolution_accGradParameters)(lua_State *L)
+static int nn_(SpatialFullConvolution_accGradParameters)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
@@ -61,17 +61,17 @@ static int nn_(SpatialBackConvolution_accGradParameters)(lua_State *L)
   return 0;
 }
 
-static const struct luaL_Reg nn_(SpatialBackConvolution__) [] = {
-  {"SpatialBackConvolution_updateOutput", nn_(SpatialBackConvolution_updateOutput)},
-  {"SpatialBackConvolution_updateGradInput", nn_(SpatialBackConvolution_updateGradInput)},
-  {"SpatialBackConvolution_accGradParameters", nn_(SpatialBackConvolution_accGradParameters)},
+static const struct luaL_Reg nn_(SpatialFullConvolution__) [] = {
+  {"SpatialFullConvolution_updateOutput", nn_(SpatialFullConvolution_updateOutput)},
+  {"SpatialFullConvolution_updateGradInput", nn_(SpatialFullConvolution_updateGradInput)},
+  {"SpatialFullConvolution_accGradParameters", nn_(SpatialFullConvolution_accGradParameters)},
   {NULL, NULL}
 };
 
-static void nn_(SpatialBackConvolution_init)(lua_State *L)
+static void nn_(SpatialFullConvolution_init)(lua_State *L)
 {
   luaT_pushmetaclass(L, torch_(Tensor_id));
-  luaT_registeratname(L, nn_(SpatialBackConvolution__), "nn");
+  luaT_registeratname(L, nn_(SpatialFullConvolution__), "nn");
   lua_pop(L,1);
 }
 

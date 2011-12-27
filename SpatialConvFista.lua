@@ -16,7 +16,7 @@ function SpatialConvFistaL1:__init(inputFeatures, outputFeatures, kw, kh, iw, ih
    -- sparsity coefficient
    self.lambda = lambda
    -- dictionary is a linear layer so that I can train it
-   self.D = nn.SpatialBackConvolution(outputFeatures, inputFeatures, kw, kh, 1, 1)
+   self.D = nn.SpatialFullConvolution(outputFeatures, inputFeatures, kw, kh, 1, 1)
    -- L2 reconstruction cost with weighting
    local tt = torch.Tensor(ih,iw)
    local utt= tt:unfold(1,kh,1):unfold(2,kw,1)

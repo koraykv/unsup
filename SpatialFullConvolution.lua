@@ -1,6 +1,6 @@
-local SpatialBackConvolution, parent = torch.class('nn.SpatialBackConvolution','nn.Module')
+local SpatialFullConvolution, parent = torch.class('nn.SpatialFullConvolution','nn.Module')
 
-function SpatialBackConvolution:__init(nInputPlane, nOutputPlane, kW, kH)
+function SpatialFullConvolution:__init(nInputPlane, nOutputPlane, kW, kH)
    parent.__init(self)
 
    dW = dW or 1
@@ -19,7 +19,7 @@ function SpatialBackConvolution:__init(nInputPlane, nOutputPlane, kW, kH)
    self:reset()
 end
 
-function SpatialBackConvolution:reset(stdv)
+function SpatialFullConvolution:reset(stdv)
    if stdv then
       stdv = stdv * math.sqrt(3)
    else
@@ -31,18 +31,19 @@ function SpatialBackConvolution:reset(stdv)
    self.weight:apply(function()
                         return random.uniform(-stdv, stdv)
                      end)
+
 end
 
-function SpatialBackConvolution:updateOutput(input)
-   return input.nn.SpatialBackConvolution_updateOutput(self, input)
+function SpatialFullConvolution:updateOutput(input)
+   return input.nn.SpatialFullConvolution_updateOutput(self, input)
 end
 
-function SpatialBackConvolution:updateGradInput(input, gradOutput)
+function SpatialFullConvolution:updateGradInput(input, gradOutput)
    if self.gradInput then
-      return input.nn.SpatialBackConvolution_updateGradInput(self, input, gradOutput)
+      return input.nn.SpatialFullConvolution_updateGradInput(self, input, gradOutput)
    end
 end
-function SpatialBackConvolution:accGradParameters(input, gradOutput, scale)
-   return input.nn.SpatialBackConvolution_accGradParameters(self, input, gradOutput, scale)
+function SpatialFullConvolution:accGradParameters(input, gradOutput, scale)
+   return input.nn.SpatialFullConvolution_accGradParameters(self, input, gradOutput, scale)
 end
 

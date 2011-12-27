@@ -12,7 +12,7 @@ SET(luasrc init.lua
   Fista.lua 
   Fista2.lua 
   Kmeans.lua 
-  SpatialBackConvolution.lua 
+  SpatialFullConvolution.lua 
   WeightedMSECriterion.lua
   test/test.lua
   test/test_conv.lua

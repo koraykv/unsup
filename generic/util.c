@@ -29,7 +29,7 @@ static int unsup_(shrinkage)(lua_State *L)
 static int unsup_(sign)(lua_State *L)
 {
   int narg = lua_gettop(L);
-  THTensor *tensor;
+  THTensor *tensor = NULL;
   THTensor *r = luaT_checkudata(L,1,torch_(Tensor_id));
   if (narg == 1)
   {
