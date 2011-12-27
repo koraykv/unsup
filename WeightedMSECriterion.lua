@@ -13,5 +13,7 @@ function WeightedMSECriterion:updateOutput(input,target)
 end
 
 function WeightedMSECriterion:updateGradInput(input, target)
+   self.buffer:resizeAs(input):copy(target)
+   self.buffer:cmul(self.weight)
    return input.nn.MSECriterion_updateGradInput(self, input, self.buffer)
 end
