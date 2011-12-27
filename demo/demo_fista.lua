@@ -70,13 +70,13 @@ function Linear:zeroGradParameters()
    self.gradBias:mul(params.momentum)
 end
 
-local SpatialBackConvolution = torch.getmetatable("nn.SpatialBackConvolution")
-local oldSpatialBackConvolutionUpdateParameters = SpatialBackConvolution.updateParameters
-function SpatialBackConvolution:updateParameters(learningRate)
-   oldSpatialBackConvolutionUpdateParameters(self, learningRate/(self.kW*self.kH*self.nInputPlane))
+local SpatialFullConvolution = torch.getmetatable("nn.SpatialFullConvolution")
+local oldSpatialFullConvolutionUpdateParameters = SpatialFullConvolution.updateParameters
+function SpatialFullConvolution:updateParameters(learningRate)
+   oldSpatialFullConvolutionUpdateParameters(self, learningRate/(self.kW*self.kH*self.nInputPlane))
 end
-local oldSpatialBackConvolutionZeroGradParameters = SpatialBackConvolution.zeroGradParameters
-function SpatialBackConvolution:zeroGradParameters()
+local oldSpatialFullConvolutionZeroGradParameters = SpatialFullConvolution.zeroGradParameters
+function SpatialFullConvolution:zeroGradParameters()
    self.gradWeight:mul(params.momentum)
 end
 
