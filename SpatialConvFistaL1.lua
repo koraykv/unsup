@@ -8,7 +8,7 @@ local SpatialConvFistaL1, parent = torch.class('unsup.SpatialConvFistaL1','nn.Mo
 -- iw              : width of input patches
 -- ih              : height of input patches
 -- lambda          : sparsity coefficient
--- params          : unsup.FistaLS parameters
+-- params          : optim.FistaLS parameters
 function SpatialConvFistaL1:__init(inputFeatures, outputFeatures, kw, kh, iw, ih, lambda, params)
 
    parent.__init(self)
@@ -30,7 +30,7 @@ function SpatialConvFistaL1:__init(inputFeatures, outputFeatures, kw, kh, iw, ih
 
    -- this is going to be set at each forward call.
    self.input = nil
-   -- this is going to be passed to unsup.FistaLS
+   -- this is going to be passed to optim.FistaLS
    self.code = torch.Tensor(outputFeatures, utt:size(1),utt:size(2)):fill(0)
 
    -- Now I need a function to pass along as f
@@ -101,7 +101,7 @@ function SpatialConvFistaL1:updateOutput(input)
    self.code:fill(0)
    -- do fista solution
    local oldL = self.params.L
-   local code, h = unsup.FistaLS(self.f, self.g, self.pl, self.code, self.params)
+   local code, h = optim.FistaLS(self.f, self.g, self.pl, self.code, self.params)
    local fval = h[#h].F
 
    -- let's just half the params.L (eq. to double learning rate)

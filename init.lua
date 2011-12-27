@@ -4,17 +4,16 @@ require 'lab'
 require 'nn'
 require 'libunsup'
 
-torch.include('unsup', 'Kmeans.lua')
+-- extra modules that we need
 torch.include('unsup', 'SpatialFullConvolution.lua')
 torch.include('unsup', 'WeightedMSECriterion.lua')
-torch.include('unsup', 'FistaDrivers.lua')
-torch.include('unsup', 'Fista.lua')
-torch.include('unsup', 'Fista2.lua')
-torch.include('unsup', 'LinearFista.lua')
-torch.include('unsup', 'SpatialConvFista.lua')
-torch.include('unsup', 'UnsupModule.lua')
-torch.include('unsup', 'FunctionCost.lua')
-torch.include('unsup', 'CriterionModule.lua')
+
+-- classes that implement algorithms
 torch.include('unsup', 'L1Cost.lua')
+torch.include('unsup', 'Kmeans.lua')
+torch.include('unsup', 'Fista.lua')
+torch.include('unsup', 'LinearFistaL1.lua')
+torch.include('unsup', 'SpatialConvFistaL1.lua')
+
 torch.include('unsup', 'test.lua')
 

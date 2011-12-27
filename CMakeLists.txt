@@ -2,24 +2,16 @@
 SET(src init.c)
 
 SET(luasrc init.lua 
-  CriterionModule.lua 
-  L1Cost.lua
-  FunctionCost.lua 
-  LinearFista.lua 
-  SpatialConvFista.lua 
-  UnsupModule.lua 
-  FistaDrivers.lua 
-  Fista.lua 
-  Fista2.lua 
-  Kmeans.lua 
   SpatialFullConvolution.lua 
   WeightedMSECriterion.lua
+  L1Cost.lua
+  LinearFistaL1.lua 
+  SpatialConvFistaL1.lua 
+  Kmeans.lua 
   test/test.lua
   test/test_conv.lua
   test/test_km.lua
   test/test_fista.lua
-  test/test_fista2.lua
-  test/test_fista3.lua
   )
 
 ADD_TORCH_PACKAGE(unsup "${src}"  "${luasrc}" "Unsupervised Learning")

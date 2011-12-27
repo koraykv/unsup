@@ -1,4 +1,5 @@
 require 'nn'
+require 'optim'
 
 local LinearFistaL1, parent = torch.class('unsup.LinearFistaL1','nn.Module')
 
@@ -6,7 +7,7 @@ local LinearFistaL1, parent = torch.class('unsup.LinearFistaL1','nn.Module')
 -- inputSize   : size of input
 -- outputSize  : size of code
 -- lambda      : sparsity coefficient
--- params      : unsup.FistaLS parameters
+-- params      : optim.FistaLS parameters
 function LinearFistaL1:__init(inputSize, outputSize, lambda, params)
 
    parent.__init(self)
@@ -94,7 +95,7 @@ function LinearFistaL1:updateOutput(input)
    self.code:fill(0)
    -- do fista solution
    local oldL = self.params.L
-   local code, h = unsup.FistaLS(self.f, self.g, self.pl, self.code, self.params)
+   local code, h = optim.FistaLS(self.f, self.g, self.pl, self.code, self.params)
    local fval = h[#h].F
 
    -- let's just half the params.L (eq. to double learning rate)
