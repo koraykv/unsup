@@ -2,6 +2,8 @@ require 'torch'
 require 'random'
 require 'lab'
 require 'nn'
+
+require 'kex'
 require 'optim'
 require 'libunsup'
 

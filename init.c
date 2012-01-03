@@ -16,9 +16,6 @@ static const void* torch_LongTensor_id = NULL;
 #include "generic/L1Cost.c"
 #include "THGenerateFloatTypes.h"
 
-#include "generic/util.c"
-#include "THGenerateFloatTypes.h"
-
 DLL_EXPORT int luaopen_libunsup(lua_State *L)
 {
   torch_FloatTensor_id = luaT_checktypename2id(L, "torch.FloatTensor");
@@ -35,9 +32,6 @@ DLL_EXPORT int luaopen_libunsup(lua_State *L)
   nn_FloatL1Cost_init(L);
   nn_DoubleL1Cost_init(L);
 
-  unsup_Floatutil_init(L);
-  unsup_Doubleutil_init(L);
-  
   return 1;
 }
 
