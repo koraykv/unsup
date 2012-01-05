@@ -35,39 +35,39 @@ function SpatialConvFistaL1:__init(inputFeatures, outputFeatures, kw, kh, iw, ih
    -- input is code, do reconstruction, calculate cost
    -- and possibly derivatives too
    self.f = function(x, mode)
-	       local code = x
-	       local gradx = nil
-	       local input = self.input
+               local code = x
+               local gradx = nil
+               local input = self.input
 
-	       -- forward function evaluation
-	       local reconstruction = self.D:updateOutput(code)
-	       local fval = self.Fcost:updateOutput(reconstruction, input)
+               -- forward function evaluation
+               local reconstruction = self.D:updateOutput(code)
+               local fval = self.Fcost:updateOutput(reconstruction, input)
 
-	       -- derivative wrt code
-	       if mode and mode:match('dx') then
-		  local gradr = self.Fcost:updateGradInput(reconstruction, input)
-		  gradx = self.D:updateGradInput(code, gradr)
-	       end
-	       return fval, gradx
-	    end
+               -- derivative wrt code
+               if mode and mode:match('dx') then
+                  local gradr = self.Fcost:updateGradInput(reconstruction, input)
+                  gradx = self.D:updateGradInput(code, gradr)
+               end
+               return fval, gradx
+            end
 
    -- Next, we need function g that will be the non-smooth function
    self.g = function(x)
-	       local code = x
-	       local gradx = nil
-	       local fval = self.lambda * self.Gcost:updateOutput(code)
-	       if mode and mode:match('dx') then
-		  gradx = self.Gcost:updateGradInput(code)
-		  gradx:mul(self.lambda)
-	       end
-	       return fval, gradx
-	    end
+               local code = x
+               local gradx = nil
+               local fval = self.lambda * self.Gcost:updateOutput(code)
+               if mode and mode:match('dx') then
+                  gradx = self.Gcost:updateGradInput(code)
+                  gradx:mul(self.lambda)
+               end
+               return fval, gradx
+            end
 
    -- Finally we need argmin_x Q(x,y)
    self.pl = function(x, L)
-		local code = x
-		code:shrinkage(self.lambda/L)
-	     end
+                local code = x
+                code:shrinkage(self.lambda/L)
+             end
 
    -- this is for keeping parameters related to fista algorithm
    self.params = params or {}
@@ -139,8 +139,8 @@ function SpatialConvFistaL1:updateParameters(learningRate)
    local w = self.D.weight
    for i=1,w:size(1) do
       for j=1,w:size(2) do
-	 local k=w:select(1,i):select(1,j)
-	 k:div(k:norm()+1e-12)
+         local k=w:select(1,i):select(1,j)
+         k:div(k:norm()+1e-12)
       end
    end
    --self.D.bias:fill(0)
