@@ -1,6 +1,3 @@
-require 'nn'
-require 'optim'
-
 local LinearFistaL1, parent = torch.class('unsup.LinearFistaL1','nn.Module')
 
 

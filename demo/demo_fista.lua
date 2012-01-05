@@ -74,7 +74,7 @@ end
 local SpatialFullConvolution = torch.getmetatable("nn.SpatialFullConvolution")
 local oldSpatialFullConvolutionUpdateParameters = SpatialFullConvolution.updateParameters
 function SpatialFullConvolution:updateParameters(learningRate)
-   oldSpatialFullConvolutionUpdateParameters(self, learningRate/(self.kW*self.kH*self.nInputPlane))
+   oldSpatialFullConvolutionUpdateParameters(self, learningRate/(self.nInputPlane))
 end
 local oldSpatialFullConvolutionZeroGradParameters = SpatialFullConvolution.zeroGradParameters
 function SpatialFullConvolution:zeroGradParameters()

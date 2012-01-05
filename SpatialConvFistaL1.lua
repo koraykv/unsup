@@ -1,5 +1,3 @@
-require 'nn'
-
 local SpatialConvFistaL1, parent = torch.class('unsup.SpatialConvFistaL1','nn.Module')
 -- inputFeatures   : number of input features
 -- outputFeatures  : size of code (feature maps)
