@@ -4,6 +4,7 @@ SET(src)# init.c)
 SET(luasrc init.lua 
   LinearFistaL1.lua 
   SpatialConvFistaL1.lua 
+  psd.lua
   test/test_fista.lua
   )
 
