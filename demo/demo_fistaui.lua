@@ -1,6 +1,6 @@
 require 'unsup'
 require 'image'
-require 'plot'
+require 'gnuplot'
 require 'paths'
 require 'qtwidget'
 
@@ -132,19 +132,19 @@ function train(module,dataset)
          print('# iter=' .. t .. ' eta = ' .. currentLearningRate .. ' current error = ' .. err)
 
          -- 	 -- plot training error
-         -- 	 plot.pngfigure(params.rundir .. '/error.png')
-         -- 	 plot.plot(avTrainingError:narrow(1,1,math.max(t/params.statinterval,2)))
-         -- 	 plot.title('Training Error')
-         -- 	 plot.xlabel('# iterations / ' .. params.statinterval)
-         -- 	 plot.ylabel('Cost')
+         -- 	 gnuplot.pngfigure(params.rundir .. '/error.png')
+         -- 	 gnuplot.plot(avTrainingError:narrow(1,1,math.max(t/params.statinterval,2)))
+         -- 	 gnuplot.title('Training Error')
+         -- 	 gnuplot.xlabel('# iterations / ' .. params.statinterval)
+         -- 	 gnuplot.ylabel('Cost')
          -- 	 -- plot training error
-         -- 	 plot.pngfigure(params.rundir .. '/iter.png')
-         -- 	 plot.plot(avFistaIterations:narrow(1,1,math.max(t/params.statinterval,2)))
-         -- 	 plot.title('Fista Iterations')
-         -- 	 plot.xlabel('# iterations / ' .. params.statinterval)
-         -- 	 plot.ylabel('Fista Iterations')
-         -- 	 plot.plotflush()
-         -- 	 plot.closeall()
+         -- 	 gnuplot.pngfigure(params.rundir .. '/iter.png')
+         -- 	 gnuplot.plot(avFistaIterations:narrow(1,1,math.max(t/params.statinterval,2)))
+         -- 	 gnuplot.title('Fista Iterations')
+         -- 	 gnuplot.xlabel('# iterations / ' .. params.statinterval)
+         -- 	 gnuplot.ylabel('Fista Iterations')
+         -- 	 gnuplot.plotflush()
+         -- 	 gnuplot.closeall()
 
          -- 	 -- plot filters
          -- 	 local dd = image.toDisplayTensor{input=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}

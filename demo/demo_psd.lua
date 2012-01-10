@@ -20,6 +20,7 @@ cmd:option('-nfiltersout', 32, 'number of output convolutional filters')
 cmd:option('-kernelsize', 9, 'size of convolutional kernels')
 cmd:option('-inputsize', 9, 'size of each input patch')
 cmd:option('-lambda', 1, 'sparsity coefficient')
+cmd:option('-beta', 1, 'prediction error coefficient')
 cmd:option('-datafile', 'tr-berkeley-N5K-M56x56-lcn.bin','Data set file')
 cmd:option('-eta',0.01,'learning rate')
 cmd:option('-momentum',0,'gradient momentum')
@@ -33,7 +34,7 @@ cmd:text()
 
 local params = cmd:parse(arg)
 
-local rundir = cmd:string('unsup', params, {dir=true})
+local rundir = cmd:string('psd', params, {dir=true})
 params.rundir = params.dir .. '/' .. rundir
 
 if paths.dirp(params.rundir) then
@@ -51,10 +52,10 @@ data = getdata(params.datafile, params.inputsize)
 
 -- creat unsup stuff
 if params.inputsize == params.kernelsize and params.conv == false then
-   print('Linear sparse coding')
-   mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
+   print('Linear psd')
+   mlp = unsup.PSD(params.inputsize*params.inputsize, params.nfiltersout, params.lambda, params.beta )
 else
-   print('Convolutional sparse coding')
+   print('Convolutional psd')
    mlp = unsup.SpatialConvFistaL1(params.nfiltersin, params.nfiltersout, params.kernelsize, params.kernelsize, params.inputsize, params.inputsize, params.lambda)
 end
 --------------------------------------------------------------------------------
@@ -132,13 +133,16 @@ function train(module,dataset)
        gnuplot.closeall()
 
        -- plot filters
-       local dd
-       if mlp.D.weight:dim() == 2 then
-         dd = image.toDisplayTensor{input=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}
+       local dd,de
+       if mlp.decoder.D.weight:dim() == 2 then
+         dd = image.toDisplayTensor{input=mlp.decoder.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}
+         de = image.toDisplayTensor{input=mlp.encoder.weight:unfold(2,9,9),padding=1,nrow=8,symmetric=true}
       else
-         dd = image.toDisplayTensor{input=mlp.D.weight,padding=1,nrow=8,symmetric=true}
+         de = image.toDisplayTensor{input=mlp.encoder.weight,padding=1,nrow=8,symmetric=true}
+         dd = image.toDisplayTensor{input=mlp.decoder.D.weight,padding=1,nrow=8,symmetric=true}
       end
-      image.saveJPG(params.rundir .. '/filters_' .. t .. '.jpg',dd)
+      image.saveJPG(params.rundir .. '/filters_dec_' .. t .. '.jpg',dd)
+      image.saveJPG(params.rundir .. '/filters_enc_' .. t .. '.jpg',de)
 
       -- store model
       local mf = torch.DiskFile(params.rundir .. '/model_' .. t .. '.bin','w'):binary()
