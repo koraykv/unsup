@@ -42,6 +42,11 @@ function getdata(datafile, inputsize, std)
    end
 
    local dsample = torch.Tensor(inputsize*inputsize)
+
+   function dataset:conv()
+      dsample = torch.Tensor(1,inputsize,inputsize)
+   end
+
    setmetatable(dataset, {__index = function(self, index)
 				       local sample,i,im = self:selectPatch(inputsize, inputsize)
 				       dsample:copy(sample)

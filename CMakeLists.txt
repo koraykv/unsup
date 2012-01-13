@@ -5,6 +5,8 @@ SET(luasrc init.lua
   LinearFistaL1.lua 
   SpatialConvFistaL1.lua 
   psd.lua
+  LinearPsd.lua
+  ConvPsd.lua
   test/test_fista.lua
   )
 
