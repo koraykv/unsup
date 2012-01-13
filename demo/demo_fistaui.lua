@@ -63,22 +63,9 @@ end
 
 -- creat unsup stuff
 mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-local Linear = torch.getmetatable("nn.Linear")
-local oldLinearUpdateParameters = Linear.updateParameters
-function Linear:updateParameters(learningRate)
-   -- scale the gradients so that we do not add up bluntly like in batch
-   oldLinearUpdateParameters(self, learningRate/self.weight:size(2))
-end
-local oldLinearzeroGradParameters = Linear.zeroGradParameters
-function Linear:zeroGradParameters()
-   self.gradWeight:mul(params.momentum)
-   self.gradBias:mul(params.momentum)
-end
 
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
+-- do learrning rate hacks
+kex.nnhacks()
 
 function train(module,dataset)
 

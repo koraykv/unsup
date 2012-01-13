@@ -57,32 +57,9 @@ else
    print('Convolutional sparse coding')
    mlp = unsup.SpatialConvFistaL1(params.nfiltersin, params.nfiltersout, params.kernelsize, params.kernelsize, params.inputsize, params.inputsize, params.lambda)
 end
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-local Linear = torch.getmetatable("nn.Linear")
-local oldLinearUpdateParameters = Linear.updateParameters
-function Linear:updateParameters(learningRate)
-   -- scale the gradients so that we do not add up bluntly like in batch
-   oldLinearUpdateParameters(self, learningRate/self.weight:size(2))
-end
-local oldLinearzeroGradParameters = Linear.zeroGradParameters
-function Linear:zeroGradParameters()
-   self.gradWeight:mul(params.momentum)
-   self.gradBias:mul(params.momentum)
-end
 
-local SpatialFullConvolution = torch.getmetatable("nn.SpatialFullConvolution")
-local oldSpatialFullConvolutionUpdateParameters = SpatialFullConvolution.updateParameters
-function SpatialFullConvolution:updateParameters(learningRate)
-   oldSpatialFullConvolutionUpdateParameters(self, learningRate/(self.nInputPlane))
-end
-local oldSpatialFullConvolutionZeroGradParameters = SpatialFullConvolution.zeroGradParameters
-function SpatialFullConvolution:zeroGradParameters()
-   self.gradWeight:mul(params.momentum)
-end
-
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
+-- do learrning rate hacks
+kex.nnhacks()
 
 function train(module,dataset)
 

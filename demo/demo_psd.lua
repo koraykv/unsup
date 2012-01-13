@@ -66,6 +66,9 @@ end
 if params.eta_encoder == 0 then params.eta_encoder = params.eta end
 params.eta = torch.Tensor({params.eta_encoder, params.eta})
 
+-- do learrning rate hacks
+kex.nnhacks()
+
 function train(module,dataset)
 
    local avTrainingError = torch.FloatTensor(math.ceil(params.maxiter/params.statinterval)):zero()
