@@ -1,4 +1,4 @@
-require 'lab'
+require 'torch'
 require 'nn'
 
 require 'kex'

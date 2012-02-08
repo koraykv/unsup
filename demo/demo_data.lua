@@ -98,15 +98,15 @@ function getdatacam(inputsize, std)
 	 print('imsq',imsq:min(),imsq:max())
       end
 
-      lab.conv2(lmnh,im,gfh)
-      lab.conv2(lmn,lmnh,gfv)
+      torch.conv2(lmnh,im,gfh)
+      torch.conv2(lmn,lmnh,gfv)
       if data_verbose then
 	 print('lmn',lmn:min(),lmn:max())
       end
 
-      --local lmn = lab.conv2(im,gf)
-      lab.conv2(lmnsqh,imsq,gfh)
-      lab.conv2(lmnsq,lmnsqh,gfv)
+      --local lmn = torch.conv2(im,gf)
+      torch.conv2(lmnsqh,imsq,gfh)
+      torch.conv2(lmnsq,lmnsqh,gfv)
       if data_verbose then	 
 	 print('lmnsq',lmnsq:min(),lmnsq:max())
       end
