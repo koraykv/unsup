@@ -7,15 +7,24 @@ local SpatialConvFistaL1, parent = torch.class('unsup.SpatialConvFistaL1','nn.Mo
 -- ih              : height of input patches
 -- lambda          : sparsity coefficient
 -- params          : optim.FistaLS parameters
-function SpatialConvFistaL1:__init(inputFeatures, outputFeatures, kw, kh, iw, ih, lambda, params)
+function SpatialConvFistaL1:__init(conntable, kw, kh, iw, ih, lambda, params)
 
    parent.__init(self)
 
+   -----------------------------------------
    -- sparsity coefficient
+   -----------------------------------------
    self.lambda = lambda
+
+   -----------------------------------------
    -- dictionary is a linear layer so that I can train it
-   self.D = nn.SpatialFullConvolution(outputFeatures, inputFeatures, kw, kh, 1, 1)
+   -----------------------------------------
+   self.D = nn.SpatialFullConvolutionMap(conntable, kw, kh, 1, 1)
+   local outputFeatures = conntable:select(2,1):max()
+
+   -----------------------------------------
    -- L2 reconstruction cost with weighting
+   -----------------------------------------
    local tt = torch.Tensor(ih,iw)
    local utt= tt:unfold(1,kh,1):unfold(2,kw,1)
    tt:zero()
@@ -23,7 +32,10 @@ function SpatialConvFistaL1:__init(inputFeatures, outputFeatures, kw, kh, iw, ih
    tt:div(tt:max())
    self.Fcost = nn.WeightedMSECriterion(tt)
    self.Fcost.sizeAverage = false;
+
+   -----------------------------------------
    -- L1 sparsity cost
+   -----------------------------------------
    self.Gcost = nn.L1Cost()
 
    -- this is going to be set at each forward call.
@@ -137,11 +149,20 @@ function SpatialConvFistaL1:updateParameters(learningRate)
    self.D:updateParameters(learningRate)
    -- normalize the dictionary
    local w = self.D.weight
-   for i=1,w:size(1) do
-      for j=1,w:size(2) do
-         local k=w:select(1,i):select(1,j)
-         k:div(k:norm()+1e-12)
+   if w:dim() == 4 then
+      for i=1,w:size(1) do
+	 for j=1,w:size(2) do
+	    local k=w:select(1,i):select(1,j)
+	    k:div(k:norm()+1e-12)
+	 end
       end
+   elseif w:dim() == 3 then
+      for i=1,w:size(1) do
+	 local k=w:select(1,i)
+	 k:div(k:norm()+1e-12)
+      end
+   else
+      error('I do not know what kind of weight matrix this is')
    end
    --self.D.bias:fill(0)
 end
