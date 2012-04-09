@@ -1,4 +1,4 @@
-local LinearFistaL1, parent = torch.class('unsup.LinearFistaL1','nn.Module')
+local LinearFistaL1, parent = torch.class('unsup.LinearFistaL1','unsup.UnsupModule')
 
 
 -- inputSize   : size of input
@@ -133,13 +133,15 @@ end
 
 function LinearFistaL1:updateParameters(learningRate)
    self.D:updateParameters(learningRate)
+   self.D.bias:fill(0)
+end
+
+function LinearFistaL1:normalize()
    -- normalize the dictionary
    local w = self.D.weight
    for i=1,w:size(2) do
       w:select(2,i):div(w:select(2,i):norm()+1e-12)
    end
-   self.D.bias:fill(0)
 end
-
 
 

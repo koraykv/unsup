@@ -11,6 +11,8 @@ SET(luasrc init.lua
   psd.lua
   LinearPsd.lua
   ConvPsd.lua
+  UnsupModule.lua
+  UnsupTrainer.lua
   test/test_fista.lua
   )
 

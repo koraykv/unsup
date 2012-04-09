@@ -1,4 +1,4 @@
-local PSD, parent = torch.class('unsup.PSD','nn.Module')
+local PSD, parent = torch.class('unsup.PSD','unsup.UnsupModule')
 
 -- encoder     : predictor module (something dervied from nn.Module generally)
 -- decoder     : decoding module (generally a linear or convolutional fista L1)
@@ -19,6 +19,7 @@ function PSD:__init(encoder, decoder, beta, params)
 
    -- prediction cost
    self.predcost = nn.MSECriterion()
+   self.predcost.sizeAverage = false
 
    -- parameters
    params = params or {}
@@ -34,6 +35,11 @@ function PSD:parameters()
    return seq:parameters()
 end
 
+function PSD:initDiagHessianParameters()
+   self.encoder:initDiagHessianParameters()
+   self.decoder:initDiagHessianParameters()
+end
+
 function PSD:reset(stdv)
    self.decoder:reset(stdv)
    self.encoder:reset(stdv)
@@ -43,7 +49,7 @@ function PSD:updateOutput(input)
    -- pass through encoder
    local prediction = self.encoder:updateOutput(input)
    -- do FISTA
-   local fval,h = self.decoder:updateOutput(input)
+   local fval,h = self.decoder:updateOutput(input,prediction)
    -- calculate prediction error
    local perr = self.predcost:updateOutput(prediction, self.decoder.code)
    -- return total cost
@@ -66,6 +72,17 @@ function PSD:accGradParameters(input, gradOutput)
    self.encoder:accGradParameters(input,self.predcost.gradInput)
 end
 
+function PSD:updateDiagHessianInput(input, diagHessianOutput)
+   local predhess = self.predcost:updateDiagHessianInput(self.encoder.output, self.decoder.code)
+   predhess:mul(self.beta)
+   self.encoder:updateDiagHessianInput(input,predhess)
+end
+
+function PSD:accDiagHessianParameters(input, diagHessianOutput)
+   self.decoder:accDiagHessianParameters(input)
+   self.encoder:accDiagHessianParameters(input,self.predcost.diagHessianInput)
+end
+
 function PSD:zeroGradParameters()
    self.encoder:zeroGradParameters()
    self.decoder:zeroGradParameters()
@@ -83,3 +100,6 @@ function PSD:updateParameters(learningRate)
    self.encoder:updateParameters(eta[1])
 end
 
+function PSD:normalize()
+   self.decoder:normalize()
+end
