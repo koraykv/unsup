@@ -21,6 +21,8 @@ function UnsupTrainer:train(params)
    local dohessian = params.hessian or false
    local hessianinterval = params.hessianinterval or statinterval
 
+   if not dohessian then self.parameters[3] = nil end
+
    local age = 1
    local err = 0
    while age <= maxiter do
