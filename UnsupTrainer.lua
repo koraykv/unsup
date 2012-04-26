@@ -64,7 +64,9 @@ end
 function UnsupTrainer:computeDiagHessian(params)
    local hessiansamples = params.hessiansamples or 500
    local minhessian = params.minhessian or 0.02
+   local maxhessian = params.maxhessian or 1/minhessian
    local di = params.di
+   print('Min Hessian=' .. minhessian .. ' Max Hessian=' .. maxhessian)
 
    local parameters = self.parameters
 
@@ -105,7 +107,11 @@ function UnsupTrainer:computeDiagHessian(params)
       ddeltax:mul(kold)
       ddeltax:add(knew,ddx)
    end
-   ddeltax:add(minhessian)
+   print('ddeltax : min/max = ' .. ddeltax:min() .. '/' .. ddeltax:max())
+   ddeltax[torch.lt(ddeltax,minhessian)] = minhessian
+   ddeltax[torch.gt(ddeltax,maxhessian)] = maxhessian
+   print('ddeltax : min/max = ' .. ddeltax:min() .. '/' .. ddeltax:max())
+   --ddeltax:add(minhessian)
    ddx:copy(ddeltax)
 end
 
@@ -126,6 +132,16 @@ function UnsupTrainer:trainSample(ex, eta)
    module:updateGradInput(input, target)
    module:accGradParameters(input, target)
 
+   if dx:max() > 100 or dx:min() < -100 then
+      print('oops large dx ' .. dx:max() .. ' ' .. dx:min())
+   end
+
+   if torch.ne(dx,dx):sum()  > 0 then
+      print('oops nan dx')
+      torch.save('/home/mlshack/koray/zz.bin',module)
+      error('oops nan dx')
+   end
+
    -- do update
    if not ddx then
       -- regular sgd
@@ -134,7 +150,17 @@ function UnsupTrainer:trainSample(ex, eta)
       -- diag hessian
       x:addcdiv(-eta,dx,ddx)
    end
+   if torch.ne(x,x):sum()  > 0 then
+      print('oops nan x')
+      torch.save('/home/mlshack/koray/zz.bin',module)
+      error('oops nan x')
+   end
    module:normalize()
+   if torch.ne(x,x):sum()  > 0 then
+      print('oops nan x norm')
+      torch.save('/home/mlshack/koray/zz.bin',module)
+      error('oops nan x norm')
+   end
    return res
 end
 
