@@ -14,4 +14,5 @@ torch.include('unsup', 'psd.lua')
 torch.include('unsup', 'LinearPsd.lua')
 torch.include('unsup', 'ConvPsd.lua')
 torch.include('unsup', 'UnsupTrainer.lua')
+torch.include('unsup', 'pca.lua')
 
