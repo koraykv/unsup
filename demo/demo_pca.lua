@@ -36,7 +36,7 @@ end
 
 x=gauss2d(10000,{0,0},{1,4})
 xr=rotate(x,-45)
-e,v=unsup.pcacov(xr)
+e,v=unsup.pca(xr)
 vv=v*torch.diag(e)
 vv=torch.cat(torch.zeros(2,2),vv:t())
 
@@ -49,7 +49,7 @@ gnuplot.grid(true)
 x1=gauss2d(10000,{-3,0},{1,4})
 x2=gauss2d(10000,{ 3,0},{1,4})
 x=torch.cat(x1,x2,1)
-e,v=unsup.pcacov(x)
+e,v=unsup.pca(x)
 vv=v*torch.diag(e)
 vv=torch.cat(torch.zeros(2,2),vv:t())
 
