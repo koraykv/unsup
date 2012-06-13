@@ -152,13 +152,13 @@ function UnsupTrainer:trainSample(ex, eta)
    end
    if torch.ne(x,x):sum()  > 0 then
       print('oops nan x')
-      torch.save('/home/mlshack/koray/zz.bin',module)
+      torch.save('error.bin',module)
       error('oops nan x')
    end
    module:normalize()
    if torch.ne(x,x):sum()  > 0 then
       print('oops nan x norm')
-      torch.save('/home/mlshack/koray/zz.bin',module)
+      torch.save('error.bin',module)
       error('oops nan x norm')
    end
    return res
