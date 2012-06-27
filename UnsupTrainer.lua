@@ -17,6 +17,7 @@ function UnsupTrainer:train(params)
    local etadecay = params.etadecay or 0
    local maxiter = params.maxiter
    local statinterval = params.statinterval or math.ceil(maxiter/100)
+   local etadecayinterval = params.etadecayinterval or statinterval
    -- optional hessian stuff
    local dohessian = params.hessian or false
    local hessianinterval = params.hessianinterval or statinterval
@@ -53,7 +54,7 @@ function UnsupTrainer:train(params)
 	 print('# iter= ' .. age .. ' eta= ' .. eta .. ' current error= ' .. err)
 	 
 	 -- ETA DECAY
-	 eta = params.eta/(1+(age/statinterval)*etadecay)
+	 eta = params.eta/(1+(age/etadecayinterval)*etadecay)
 	 err = 0
       end
 
@@ -138,10 +139,11 @@ function UnsupTrainer:trainSample(ex, eta)
 
    if torch.ne(dx,dx):sum()  > 0 then
       print('oops nan dx')
-      torch.save('/home/mlshack/koray/zz.bin',module)
+      --torch.save('error.bin',module)
       error('oops nan dx')
    end
 
+   --print('k min/max (before) =',module.decoder.D.weight:min(),module.decoder.D.weight:max())
    -- do update
    if not ddx then
       -- regular sgd
@@ -152,13 +154,16 @@ function UnsupTrainer:trainSample(ex, eta)
    end
    if torch.ne(x,x):sum()  > 0 then
       print('oops nan x')
-      torch.save('error.bin',module)
+      --torch.save('error.bin',module)
       error('oops nan x')
    end
    module:normalize()
+   -- print('k min/max (after) =',module.decoder.D.weight:min(),module.decoder.D.weight:max())
+   -- print('k norm=',module.decoder.D.weight[1]:norm())
+   -- print('code min/max (after) =',module.decoder.code:min(),module.decoder.code:max())
    if torch.ne(x,x):sum()  > 0 then
       print('oops nan x norm')
-      torch.save('error.bin',module)
+      --torch.save('error.bin',module)
       error('oops nan x norm')
    end
    return res

@@ -124,7 +124,7 @@ function SpatialConvFistaL1:updateOutput(input,icode)
 
    -- let's just half the params.L (eq. to double learning rate)
    if oldL == self.params.L then
-      self.params.L = self.params.L / 2
+      self.params.L = math.max(0.1,self.params.L / 2)
    end
 
    return fval, h
@@ -166,7 +166,6 @@ end
 
 function SpatialConvFistaL1:updateParameters(learningRate)
    self.D:updateParameters(learningRate)
-   self:normalize()
 end
 
 function SpatialConvFistaL1:normalize()
@@ -182,7 +181,7 @@ function SpatialConvFistaL1:normalize()
    elseif w:dim() == 3 then
       for i=1,w:size(1) do
          local k=w:select(1,i)
-         k:div(k:norm()+1e-12)
+         k:div(k:norm())
       end
    else
       error('I do not know what kind of weight matrix this is')
