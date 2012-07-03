@@ -21,11 +21,11 @@ function getdata(datafile, inputsize, std)
       end
       while not imageok do
 	 --image index
-	 local i = math.ceil(random.uniform(1e-12,nsamples))
+	 local i = math.ceil(torch.uniform(1e-12,nsamples))
 	 local im = data:select(1,i)
 	 -- select some patch for original that contains original + pos
-	 local ri = math.ceil(random.uniform(1e-12,nrows-nr))
-	 local ci = math.ceil(random.uniform(1e-12,ncols-nc))
+	 local ri = math.ceil(torch.uniform(1e-12,nrows-nr))
+	 local ci = math.ceil(torch.uniform(1e-12,ncols-nc))
 	 local patch = im:narrow(1,ri,nr)
 	 patch = patch:narrow(2,ci,nc)
 	 local patchstd = patch:std()
@@ -153,8 +153,8 @@ function getdatacam(inputsize, std)
       while not imageok do
 
 	 -- select some patch for original that contains original + pos
-	 local ri = math.ceil(random.uniform(1e-12,nim:size(1)-nr))
-	 local ci = math.ceil(random.uniform(1e-12,nim:size(2)-nc))
+	 local ri = math.ceil(torch.uniform(1e-12,nim:size(1)-nr))
+	 local ci = math.ceil(torch.uniform(1e-12,nim:size(2)-nc))
 	 local patch = nim:narrow(1,ri,nr)
 	 patch = patch:narrow(2,ci,nc)
 	 local patchstd = patch:std()
