@@ -46,7 +46,7 @@ os.execute('mkdir -p ' .. params.rundir)
 cmd:log(params.rundir .. '/log', params)
 
 -- init random number generator
-random.manualSeed(params.seed)
+torch.manualSeed(params.seed)
 
 -- create the dataset
 data = getdata(params.datafile, params.inputsize)
