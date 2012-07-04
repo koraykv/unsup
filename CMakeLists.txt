@@ -6,6 +6,7 @@ FIND_PACKAGE(Torch REQUIRED)
 SET(src)# init.c)
 
 SET(luasrc init.lua 
+  AutoEncoder.lua
   LinearFistaL1.lua 
   SpatialConvFistaL1.lua 
   psd.lua

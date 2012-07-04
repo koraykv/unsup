@@ -24,12 +24,12 @@ function LinearPSD:__init(inputSize, outputSize, lambda, beta, params)
       self.encoder = nn.Sequential()
       self.encoder:add(nn.Linear(inputSize,outputSize))
       self.encoder:add(nn.Tanh())
-      self.encoder:add(nn.Diag())
+      self.encoder:add(nn.Diag(outputSize))
    elseif params.encoderType == 'tanh_shrink' then
       self.encoder = nn.Sequential()
       self.encoder:add(nn.Linear(inputSize,outputSize))
       self.encoder:add(nn.TanhShrink())
-      self.encoder:add(nn.Diag())
+      self.encoder:add(nn.Diag(outputSize))
    else
       error('params.encoderType unknown " ' .. params.encoderType)
    end
@@ -37,4 +37,3 @@ function LinearPSD:__init(inputSize, outputSize, lambda, beta, params)
    parent.__init(self, self.encoder, self.decoder, self.beta, self.params)
 
 end
-
