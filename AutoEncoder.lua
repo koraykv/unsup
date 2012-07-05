@@ -76,6 +76,3 @@ function AutoEncoder:updateParameters(learningRate)
    self.encoder:updateParameters(eta[1])
    self.decoder:updateParameters(eta[2])
 end
-
-function AutoEncoder:normalize()
-end

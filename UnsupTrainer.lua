@@ -30,10 +30,10 @@ function UnsupTrainer:train(params)
       
       -- HESSIAN
       if dohessian and (age-1) % hessianinterval == 0 then
-	 print('Computing Hessian')
-	 params.di = age
-	 self:computeDiagHessian(params)
-	 print('done')
+         print('Computing Hessian')
+         params.di = age
+         self:computeDiagHessian(params)
+         print('done')
       end
 
       -- DATA
@@ -48,14 +48,14 @@ function UnsupTrainer:train(params)
       if self.hookSample then self.hookSample(self,age,ex,sres) end
 
       if age % statinterval == 0 then
-	 -- HOOK EPOCH
-	 if self.hookEpoch then self.hookEpoch(self,age/statinterval) end
+         -- HOOK EPOCH
+         if self.hookEpoch then self.hookEpoch(self,age/statinterval) end
 
-	 print('# iter= ' .. age .. ' eta= ' .. eta .. ' current error= ' .. err)
-	 
-	 -- ETA DECAY
-	 eta = params.eta/(1+(age/etadecayinterval)*etadecay)
-	 err = 0
+         print('# iter= ' .. age .. ' eta= ' .. eta .. ' current error= ' .. err)
+         
+         -- ETA DECAY
+         eta = params.eta/(1+(age/etadecayinterval)*etadecay)
+         err = 0
       end
 
       age = age + 1
@@ -102,7 +102,7 @@ function UnsupTrainer:computeDiagHessian(params)
       module:accDiagHessianParameters(input, target)
 
       if ddx:min() < 0 then
-	 error('Negative ddx')
+         error('Negative ddx')
       end
 
       ddeltax:mul(kold)
@@ -168,6 +168,3 @@ function UnsupTrainer:trainSample(ex, eta)
    end
    return res
 end
-
-
-
