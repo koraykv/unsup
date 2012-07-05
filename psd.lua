@@ -57,8 +57,6 @@ function PSD:updateOutput(input)
 end
 
 function PSD:updateGradInput(input, gradOutput)
-   -- get gradient from decoder
-   --local decgrad = decoder:updateGradInput(input, gradOutput)
    -- get grad from prediction cost
    local predgrad = self.predcost:updateGradInput(self.encoder.output, self.decoder.code)
    predgrad:mul(self.beta)
@@ -76,6 +74,8 @@ function PSD:updateDiagHessianInput(input, diagHessianOutput)
    local predhess = self.predcost:updateDiagHessianInput(self.encoder.output, self.decoder.code)
    predhess:mul(self.beta)
    self.encoder:updateDiagHessianInput(input,predhess)
+   self.diagHessianInput = self.encoder.diagHessianInput
+   return self.diagHessianInput
 end
 
 function PSD:accDiagHessianParameters(input, diagHessianOutput)
