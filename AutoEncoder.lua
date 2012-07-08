@@ -1,11 +1,15 @@
 local AutoEncoder = torch.class('unsup.AutoEncoder','unsup.UnsupModule')
 
-function AutoEncoder:__init(encoder, decoder, beta)
-   self.beta = beta
-   self.mse = nn.MSECriterion()
-   self.mse.sizeAverage = false
+function AutoEncoder:__init(encoder, decoder, beta, loss)
    self.encoder = encoder
    self.decoder = decoder
+   self.beta = beta
+   if loss then
+      self.loss = nn.MSECriterion()
+   else
+      self.loss = nn.MSECriterion()
+      self.loss.sizeAverage = false
+   end
 end
 
 function AutoEncoder:parameters()
@@ -28,21 +32,21 @@ end
 function AutoEncoder:updateOutput(input,target)
    self.encoder:forward(input)
    self.decoder:forward(self.encoder.output)
-   self.output = self.beta * self.mse:forward(self.decoder.output, target)
+   self.output = self.beta * self.loss:forward(self.decoder.output, target)
    return self.output,{self.output}
 end
 
 function AutoEncoder:updateGradInput(input,target)
-   self.mse:updateGradInput(self.decoder.output, target)
-   self.mse.gradInput:mul(self.beta)
-   self.decoder:updateGradInput(self.encoder.output, self.mse.gradInput)
+   self.loss:updateGradInput(self.decoder.output, target)
+   self.loss.gradInput:mul(self.beta)
+   self.decoder:updateGradInput(self.encoder.output, self.loss.gradInput)
    self.encoder:updateGradInput(input, self.decoder.gradInput)
    self.gradInput = self.encoder.gradInput
    return self.gradInput
 end
 
 function AutoEncoder:accGradParameters(input,target)
-   self.decoder:accGradParameters(self.encoder.output, self.mse.gradInput)
+   self.decoder:accGradParameters(self.encoder.output, self.loss.gradInput)
    self.encoder:accGradParameters(input, self.decoder.gradInput)
 end
 
@@ -52,16 +56,16 @@ function AutoEncoder:zeroGradParameters()
 end
 
 function AutoEncoder:updateDiagHessianInput(input, diagHessianOutput)
-   self.mse:updateDiagHessianInput(self.decoder.output, target)
-   self.mse.diagHessianInput:mul(self.beta)
-   self.decoder:updateDiagHessianInput(self.encoder.output, self.mse.diagHessianInput)
+   self.loss:updateDiagHessianInput(self.decoder.output, target)
+   self.loss.diagHessianInput:mul(self.beta)
+   self.decoder:updateDiagHessianInput(self.encoder.output, self.loss.diagHessianInput)
    self.encoder:updateDiagHessianInput(input, self.decoder.diagHessianInput)
    self.diagHessianInput = self.encoder.diagHessianInput
    return self.diagHessianInput
 end
 
 function AutoEncoder:accDiagHessianParameters(input, diagHessianOutput)
-   self.decoder:accDiagHessianParameters(self.encoder.output, self.mse.diagHessianInput)
+   self.decoder:accDiagHessianParameters(self.encoder.output, self.loss.diagHessianInput)
    self.encoder:accDiagHessianParameters(input, self.decoder.diagHessianInput)
 end
 
