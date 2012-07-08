@@ -30,10 +30,10 @@ function AutoEncoder:reset(stdv)
 end
 
 function AutoEncoder:updateOutput(input,target)
-   self.encoder:forward(input)
-   self.decoder:forward(self.encoder.output)
-   self.output = self.beta * self.loss:forward(self.decoder.output, target)
-   return self.output,{self.output}
+   self.encoder:updateOutput(input)
+   self.decoder:updateOutput(self.encoder.output)
+   self.output = self.beta * self.loss:updateOutput(self.decoder.output, target)
+   return self.output
 end
 
 function AutoEncoder:updateGradInput(input,target)
