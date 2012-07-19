@@ -5,14 +5,15 @@
 --   > x: is supposed to be an MxN matrix, where M is the nb of samples and each sample is N-dim
 --   > k: is the number of kernels
 --   > niter: the number of iterations
---   > batchsize: the batch size
+--   > batchsize: the batch size [large is good, to parallelize matrix multiplications]
 --   > callback: optional callback, at each iteration end
+--   > verbose: prints a progress bar...
 --
 --   < returns the k means (centroids)
 --
 function unsup.kmeans(x, k, std, niter, batchsize, callback, verbose)
    -- args
-   batchsize = batchsize or 1
+   batchsize = batchsize or 1000
    std = std or 0.1
 
    -- some shortcuts
