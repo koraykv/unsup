@@ -1,9 +1,10 @@
 UNSUP
 =====
 
-A package for unsupervised in Torch.
+A package for unsupervised learning in Torch.
 
-Provides modules that are compatible with `nn` (`LinearPsd`, `ConvPsd`, `AutoEncoder`, ...), and self-contained algorithms (`k-means`, `PCA`).
+Provides modules that are compatible with `nn` (`LinearPsd`, `ConvPsd`, `AutoEncoder`, ...),
+and self-contained algorithms (`k-means`, `PCA`).
 
 Requirements
 ------------
