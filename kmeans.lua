@@ -30,6 +30,7 @@ function unsup.kmeans(x, k, std, niter, batchsize, callback, verbose)
    -- initialize means
    local x2 = sum(pow(x,2),2)
    local centroids = randn(k,ndims)*std
+   local totalcounts = zeros(k)
 
    -- do niter iterations
    for i = 1,niter do
@@ -75,10 +76,13 @@ function unsup.kmeans(x, k, std, niter, batchsize, callback, verbose)
          centroids[i]:div(counts[i])
       end
 
+      -- total counts
+      totalcounts:add(counts)
+
       -- callback?
       if callback then callback(centroids) end
    end
 
    -- done
-   return centroids
+   return centroids,totalcounts
 end
