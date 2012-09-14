@@ -14,6 +14,7 @@ SET(luasrc init.lua
     UnsupModule.lua
     UnsupTrainer.lua
     pca.lua
+    kmeans.lua
     test/test_fista.lua)
 
 ADD_TORCH_PACKAGE(unsup ""  "${luasrc}" "Unsupervised Learning")
