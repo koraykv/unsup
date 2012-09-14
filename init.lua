@@ -9,6 +9,7 @@ unsup = {}
 -- classes that implement algorithms
 torch.include('unsup', 'UnsupModule.lua')
 torch.include('unsup', 'AutoEncoder.lua')
+torch.include('unsup', 'SparseAutoEncoder.lua')
 torch.include('unsup', 'LinearFistaL1.lua')
 torch.include('unsup', 'SpatialConvFistaL1.lua')
 torch.include('unsup', 'psd.lua')
