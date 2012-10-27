@@ -82,7 +82,12 @@ function LinearFistaL1:reset(stdv)
 end
 
 function LinearFistaL1:parameters()
-   return {self.D.weight},{self.D.gradWeight}
+   --return {self.D.weight},{self.D.gradWeight}
+   return self.D:parameters()
+end
+
+function LinearFistaL1:initDiagHessianParameters()
+   self.D:initDiagHessianParameters()
 end
 
 -- we do inference in forward
