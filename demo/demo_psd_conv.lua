@@ -1,5 +1,4 @@
 require 'unsup'
-require 'kex'
 require 'image'
 
 dofile 'demo_data.lua'
@@ -46,6 +45,7 @@ local params = cmd:parse(arg)
 if not params.hessian then
    error('convolutional psd runs much much much faster with psd')
 end
+nn.hessian.enable()
 
 if params.openmp or params.nThread > 1 then
    torch.setDefaultNumThreads(params.nThread)

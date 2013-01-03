@@ -25,7 +25,7 @@ cmd:option('-kernelsize', 9, 'size of convolutional kernels')
 cmd:option('-inputsize', 9, 'size of each input patch')
 cmd:option('-lambda', 1, 'sparsity coefficient')
 cmd:option('-datafile', 'tr-berkeley-N5K-M56x56-lcn.bin','Data set file')
-cmd:option('-eta',0.1,'learning rate')
+cmd:option('-eta',0.01,'learning rate')
 cmd:option('-momentum',0,'gradient momentum')
 cmd:option('-decay',0,'weigth decay')
 cmd:option('-maxiter',1000000,'max number of updates')
@@ -53,19 +53,21 @@ torch.manualSeed(params.seed)
 -- create the dataset
 if params.cam then
    data = getdatacam(params.inputsize)
+   params.dispupdate = 5
 else
-   if not paths.filep(datafile) then
+   if not paths.filep(params.datafile) then
       print('Datafile does not exist : ' .. params.datafile)
       print('You can get sample datafile from http://cs.nyu.edu/~koray/publis/code/tr-berkeley-N5K-M56x56-lcn.bin')
    end
    data = getdata(params.datafile, params.inputsize)
+   params.dispupdate = 100
 end
 
 -- creat unsup stuff
 mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout, params.lambda )
 
 -- do learrning rate hacks
-kex.nnhacks()
+--kex.nnhacks()
 
 function train(module,dataset)
 
@@ -78,8 +80,9 @@ function train(module,dataset)
       module:zeroGradParameters()
       module:updateGradInput(input, target)
       module:accGradParameters(input, target)
-      --print(module.D.gradWeight:sum())
+      --print(module.D.gradWeight:sum(),eta)
       module:updateParameters(eta)
+      module:normalize()
       return err, #h
    end
    
@@ -96,7 +99,7 @@ function train(module,dataset)
       err = err + serr
       iter = iter + siter
 
-      if math.fmod(t, 100) == 0 then
+      if math.fmod(t, params.dispupdate) == 0 then
          ww:gbegin()
          ww:showpage()
          ww:setfontsize(25)
@@ -105,7 +108,6 @@ function train(module,dataset)
          --print('plotting')
          image.display{win=ww,image=example[3],x=10,y=60,zoom=2, symmetric=true}
          image.display{win=ww,image=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symetric=true,x=example[3]:size(2)*2+30, y=60,zoom=3}
-
          ww:show(string.format('%6.2f : %6.2f',example[3]:min(), example[3]:max()), 10, 60+example[3]:size(1)*2+5,100, 20)
          ww:show(string.format('%6.2f : %6.2f',mlp.D.weight:min(), mlp.D.weight:max()),example[3]:size(2)*2+30,60+120,100,20)
          ww:gend()

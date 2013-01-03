@@ -57,7 +57,7 @@ end
 
 function getdatacam(inputsize, std)
    require 'camera'
-   local frow = 60
+   local frow = 45
    local fcol = 80
    local gs = 5
    local cam = image.Camera{width=fcol,height=frow}
@@ -118,14 +118,17 @@ function getdatacam(inputsize, std)
 	 print('2',lvar:min(),lvar:max())
       end
 
-      lvar:apply(function (x) if x<0 then return 0 else return x end end)
+      --lvar:apply(function (x) if x<0 then return 0 else return x end end)
+      lvar[torch.lt(lvar,0)] = 0
       if data_verbose then
 	 print('2',lvar:min(),lvar:max())
       end
+      
 
       local lstd = lvar
       lstd:sqrt()
-      lstd:apply(function (x) if x<1 then return 1 else return x end end)
+      --lstd:apply(function (x) if x<1 then return 1 else return x end end)
+      lstd[torch.lt(lstd,1)]=1
       if data_verbose then
 	 print('lstd',lstd:min(),lstd:max())
       end
