@@ -9,6 +9,7 @@ SET(luasrc init.lua
     Diag.lua
     AutoEncoder.lua
     SparseAutoEncoder.lua
+    FistaL1.lua
     LinearFistaL1.lua 
     SpatialConvFistaL1.lua 
     psd.lua
