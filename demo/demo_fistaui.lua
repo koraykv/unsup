@@ -33,6 +33,7 @@ cmd:option('-statinterval',5000,'interval for saving stats and models')
 cmd:option('-v', false, 'be verbose')
 cmd:option('-wcar', '', 'additional flag to differentiate this run')
 cmd:option('-cam',false,'Use camera to grab images')
+cmd:option('-dispupdate',5,'interval for camera update')
 cmd:text()
 
 local params = cmd:parse(arg)
@@ -53,7 +54,6 @@ torch.manualSeed(params.seed)
 -- create the dataset
 if params.cam then
    data = getdatacam(params.inputsize)
-   params.dispupdate = 5
 else
    if not paths.filep(params.datafile) then
       print('Datafile does not exist : ' .. params.datafile)
@@ -94,6 +94,7 @@ function train(module,dataset)
 
       local example = dataset[t]
       local im = example[3]
+      local imc = example[5]
 
       local serr, siter = updateSample(example[1], example[2] ,currentLearningRate)
       err = err + serr
@@ -106,10 +107,10 @@ function train(module,dataset)
          ww:show("Torch 7: Unsupervised Training with Sparse Coding",10,15,800,100)
          ww:setfontsize(12)
          --print('plotting')
-         image.display{win=ww,image=example[3],x=10,y=60,zoom=2, symmetric=true}
+         image.display{win=ww,image=example[5],x=10,y=60,zoom=2, symmetric=false}
          image.display{win=ww,image=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symetric=true,x=example[3]:size(2)*2+30, y=60,zoom=3}
-         ww:show(string.format('%6.2f : %6.2f',example[3]:min(), example[3]:max()), 10, 60+example[3]:size(1)*2+5,100, 20)
-         ww:show(string.format('%6.2f : %6.2f',mlp.D.weight:min(), mlp.D.weight:max()),example[3]:size(2)*2+30,60+120,100,20)
+         ww:show(string.format('%6.2f : %6.2f',example[3]:min(), example[3]:max()), 10, 60+example[3]:size(1)*2+10,100, 20)
+         ww:show(string.format('%6.2f : %6.2f',mlp.D.weight:min(), mlp.D.weight:max()),example[3]:size(2)*2+30,mlp.D.weight:size(1)/8*10*3,100,20)
          ww:gend()
       end
       

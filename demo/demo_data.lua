@@ -57,8 +57,8 @@ end
 
 function getdatacam(inputsize, std)
    require 'camera'
-   local frow = 45
-   local fcol = 80
+   local frow = 180
+   local fcol = 320
    local gs = 5
    local cam = image.Camera{width=fcol,height=frow}
    local dataset ={}
@@ -144,40 +144,50 @@ function getdatacam(inputsize, std)
       return nim
    end
 
+   local imgray,imcolor
+   local npatch = math.huge
+   local nim
+
    function dataset:selectPatch(nr,nc)
       local imageok = false
       if simdata_verbose then
-	 print('selectPatch')
+         print('selectPatch')
       end
       counter = counter + 1
-      local imgray = image.rgb2y(cam:forward())
+      if npatch > 100 then
+         imcolor = cam:forward()
+         local img = image.rgb2y(imcolor)
+         imgray = imgray or torch.Tensor():resizeAs(img[1])
+         imgray:copy(img[1])
+         npatch = 0
+         nim = lcn(imgray)
+      end
+      npatch = npatch + 1
 
-      local nim = lcn(imgray[1]:clone())
       while not imageok do
-
-	 -- select some patch for original that contains original + pos
-	 local ri = math.ceil(torch.uniform(1e-12,nim:size(1)-nr))
-	 local ci = math.ceil(torch.uniform(1e-12,nim:size(2)-nc))
-	 local patch = nim:narrow(1,ri,nr)
-	 patch = patch:narrow(2,ci,nc)
-	 local patchstd = patch:std()
-	 if data_verbose then
-	    print('Image ' .. 0 .. ' ri= ' .. ri .. ' ci= ' .. ci .. ' std= ' .. patchstd)
-	 end
-	 if patchstd > std then
-	    if data_verbose then
-	       print(patch:min(),patch:max())
-	    end
-	    return patch,i,nim
-	 end
+         -- select some patch for original that contains original + pos
+         local ri = math.ceil(torch.uniform(1e-12,nim:size(1)-nr))
+         local ci = math.ceil(torch.uniform(1e-12,nim:size(2)-nc))
+         local patch = nim:narrow(1,ri,nr)
+         patch = patch:narrow(2,ci,nc)
+         local patchstd = patch:std()
+         if data_verbose then
+            print('Image ' .. 0 .. ' ri= ' .. ri .. ' ci= ' .. ci .. ' std= ' .. patchstd)
+         end
+         if patchstd > std then
+            if data_verbose then
+               print(patch:min(),patch:max())
+            end
+            return patch,i,nim,imgray,imcolor
+         end
       end
    end
 
    local dsample = torch.Tensor(inputsize*inputsize)
    setmetatable(dataset, {__index = function(self, index)
-				       local sample,i,im = self:selectPatch(inputsize, inputsize)
+				       local sample,i,im,img,imc = self:selectPatch(inputsize, inputsize)
 				       dsample:copy(sample)
-				       return {dsample,dsample,im}
+				       return {dsample,dsample,im,img,imc}
 				    end})
    return dataset
 end
