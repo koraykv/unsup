@@ -7,7 +7,7 @@ function SparseAutoEncoder:__init(encoder, decoder, beta, lambda, loss)
    self.beta = beta
    self.lambda = lambda
    if loss then
-      self.loss = nn.MSECriterion()
+      self.loss = loss
    else
       self.loss = nn.MSECriterion()
       self.loss.sizeAverage = false
