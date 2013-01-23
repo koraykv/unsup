@@ -71,9 +71,10 @@ function unsup.kmeans(x, k, std, niter, batchsize, callback, verbose)
       end
 
       -- normalize
-      centroids[{}] = summation
       for i = 1,k do
-         centroids[i]:div(counts[i])
+         if counts[i] ~= 0 then
+            centroids[i] = summation[i]:div(counts[i])
+         end
       end
 
       -- total counts
