@@ -57,8 +57,8 @@ end
 
 function getdatacam(inputsize, std)
    require 'camera'
-   local frow = 180
-   local fcol = 320
+   local frow = 90
+   local fcol = 160
    local gs = 5
    local cam = image.Camera{width=fcol,height=frow}
    local dataset ={}
@@ -161,7 +161,10 @@ function getdatacam(inputsize, std)
          imgray:copy(img[1])
          npatch = 0
          nim = lcn(imgray)
+      elseif npatch % 10 == 0 then
+         imcolor = cam:forward()
       end
+
       npatch = npatch + 1
 
       while not imageok do

@@ -25,15 +25,15 @@ cmd:option('-kernelsize', 9, 'size of convolutional kernels')
 cmd:option('-inputsize', 9, 'size of each input patch')
 cmd:option('-lambda', 1, 'sparsity coefficient')
 cmd:option('-datafile', 'tr-berkeley-N5K-M56x56-lcn.bin','Data set file')
-cmd:option('-eta',0.01,'learning rate')
+cmd:option('-eta',0.05,'learning rate')
 cmd:option('-momentum',0,'gradient momentum')
 cmd:option('-decay',0,'weigth decay')
 cmd:option('-maxiter',1000000,'max number of updates')
 cmd:option('-statinterval',5000,'interval for saving stats and models')
 cmd:option('-v', false, 'be verbose')
 cmd:option('-wcar', '', 'additional flag to differentiate this run')
-cmd:option('-cam',false,'Use camera to grab images')
-cmd:option('-dispupdate',5,'interval for camera update')
+cmd:option('-cam',true,'Use camera to grab images')
+cmd:option('-dispupdate',10,'interval for camera update')
 cmd:text()
 
 local params = cmd:parse(arg)
@@ -69,6 +69,8 @@ mlp = unsup.LinearFistaL1(params.inputsize*params.inputsize, params.nfiltersout,
 -- do learrning rate hacks
 --kex.nnhacks()
 
+local display_cache = {}
+
 function train(module,dataset)
 
    local avTrainingError = torch.FloatTensor(math.ceil(params.maxiter/params.statinterval)):zero()
@@ -88,7 +90,8 @@ function train(module,dataset)
    
    local err = 0
    local iter = 0
-   local ww = qtwidget.newwindow(800,300)
+   ww = ww or qtwidget.newwindow(600,200)
+   local ts = torch.tic()
    
    for t = 1,params.maxiter do
 
@@ -103,14 +106,18 @@ function train(module,dataset)
       if math.fmod(t, params.dispupdate) == 0 then
          ww:gbegin()
          ww:showpage()
-         ww:setfontsize(25)
+         ww:setfontsize(20)
          ww:show("Torch 7: Unsupervised Training with Sparse Coding",10,15,800,100)
          ww:setfontsize(12)
-         --print('plotting')
-         image.display{win=ww,image=example[5],x=10,y=60,zoom=2, symmetric=false}
-         image.display{win=ww,image=mlp.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symetric=true,x=example[3]:size(2)*2+30, y=60,zoom=3}
-         ww:show(string.format('%6.2f : %6.2f',example[3]:min(), example[3]:max()), 10, 60+example[3]:size(1)*2+10,100, 20)
-         ww:show(string.format('%6.2f : %6.2f',mlp.D.weight:min(), mlp.D.weight:max()),example[3]:size(2)*2+30,mlp.D.weight:size(1)/8*10*3,100,20)
+         local zoom =2
+         local dd = mlp.D.weight:transpose(1,2):unfold(2,9,9)
+         local imw = imc:size(imc:dim())*zoom
+         local imh = imc:size(imc:dim()-1)*zoom
+         image.display{win=ww,image=imc,x=10,y=60,zoom=zoom, symmetric=false,gui=false}
+         image.display{win=ww,image=im,x=10+imw+10,y=60,zoom=zoom, symmetric=true,gui=false}
+         image.display{win=ww,image=dd,gui=false,padding=1,nrow=8,symetric=true,x=10+imw+10+imw+10, y=60,zoom=2}
+         ww:moveto(10,60+imh+30)
+         ww:show(string.format('%6.2f ex/s',t/torch.toc(ts)))
          ww:gend()
       end
       
