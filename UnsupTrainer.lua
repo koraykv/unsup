@@ -13,6 +13,7 @@ end
 
 function UnsupTrainer:train(params)
    -- essential stuff
+   local data = self.data
    local eta = params.eta
    local etadecay = params.etadecay or 0
    local maxiter = params.maxiter
