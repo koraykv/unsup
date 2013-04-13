@@ -67,7 +67,7 @@ if params.eta_encoder == 0 then params.eta_encoder = params.eta end
 params.eta = torch.Tensor({params.eta_encoder, params.eta})
 
 -- do learrning rate hacks
-kex.nnhacks()
+-- kex.nnhacks()
 
 function train(module,dataset)
 
