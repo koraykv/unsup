@@ -17,6 +17,7 @@ torch.include('unsup', 'ConvPsd.lua')
 torch.include('unsup', 'UnsupTrainer.lua')
 torch.include('unsup', 'pca.lua')
 torch.include('unsup', 'kmeans.lua')
+torch.include('unsup', 'whitening.lua')
 
 local oldhessian = nn.hessian.enable
 function nn.hessian.enable()
