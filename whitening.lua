@@ -12,8 +12,7 @@
 --
 -- Input arguments are never changed.
 --
-function unsup.zca_whiten(data, means, P)
-    local invP
+function unsup.zca_whiten(data, means, P, invP)
     local auxdata = data:clone()
     local dims = data:size()
     local nsamples = dims[1]
