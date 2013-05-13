@@ -1,4 +1,3 @@
-require 'pca'
 --
 -- ZCA-Whitening
 --
@@ -81,6 +80,4 @@ function unsup.zca_layer(data, means, P, invP)
     layer.bias:copy(layer:forward(means):mul(-1))
     return layer, means, P, invP
 end
-
-
 
