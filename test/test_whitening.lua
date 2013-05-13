@@ -20,46 +20,20 @@ local function pearson_correlation_coefficient(data)
             corr[i][j] = corr[j][i]
         end
     end
-    --print(torch.min(corr), torch.mean(corr), torch.max(corr))
     return corr
 end
  
 
 function mytest.zca_whiten()
     local gaussian_white_data = torch.randn(1000, 300)
-    --[[ 
-    do
-        image.display({image=gaussian_white_data, zoom=2, legend='gaussian_white_data'})
-        image.display({image=pearson_correlation_coefficient(gaussian_white_data), zoom=2, min=-1, max=1,   legend='corr_gaussian_white_data'})
-        gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(gaussian_white_data), 100)
-    end
-    --]]
-
+    
     local l = nn.Linear(gaussian_white_data:size(2),gaussian_white_data:size(2))
     l.weight:copy(torch.lt(torch.rand(l.weight:size()), 1/math.sqrt(gaussian_white_data:size(2))):double())
     l.bias:fill(0)
     local linearly_correlated_data = l:forward(gaussian_white_data)
-    --[[ 
-    do 
-        image.display(l.weight)
-        image.display({image=linearly_correlated_data, zoom=2, legend='linearly_correlated_data'})
-        image.display({image=pearson_correlation_coefficient(linearly_correlated_data), min=-1, max=1, zoom=2, legend='corr_linearly_correlated_data'})
-        gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(linearly_correlated_data), 100)
-    end
-    --]]
-
+    
     local zca_whitened_data
     zca_whitened_data, means, P, invP  = unsup.zca_whiten(linearly_correlated_data)
-    --[[ 
-    do
-        image.display({image=zca_whitened_data, zoom=2, legend='zca_whitened_data'})
-        image.display({image=pearson_correlation_coefficient(zca_whitened_data), zoom=2, min=-1, max=1, legend='corr_zca_whitened_data'})
-        gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(zca_whitened_data), 100)
-    end 
-    --]]
     local stat = torch.mean(torch.pow(pearson_correlation_coefficient(zca_whitened_data)
                                             - pearson_correlation_coefficient(gaussian_white_data), 2))
     tester:assertlt(stat, 1e-3, 'corr_diff < 1e-3')
@@ -68,51 +42,18 @@ end
 
 function mytest.zca_colour()
     local gaussian_white_data = torch.randn(1000, 300)
-    --[[ 
-    do
-        image.display({image=gaussian_white_data, zoom=2, legend='gaussian_white_data'})
-        image.display({image=pearson_correlation_coefficient(gaussian_white_data), zoom=2, min=-1, max=1,   legend='corr_gaussian_white_data'})
-        gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(gaussian_white_data), 100)
-    end
-    --]]
-
+    
     local l = nn.Linear(gaussian_white_data:size(2),gaussian_white_data:size(2))
     l.weight:copy(torch.lt(torch.rand(l.weight:size()), 1/math.sqrt(gaussian_white_data:size(2))):double())
     l.bias:fill(0)
     local linearly_correlated_data = l:forward(gaussian_white_data)
-    --[[ 
-    do 
-        image.display(l.weight)
-        image.display({image=linearly_correlated_data, zoom=2, legend='linearly_correlated_data'})
-        image.display({image=pearson_correlation_coefficient(linearly_correlated_data), min=-1, max=1, zoom=2, legend='corr_linearly_correlated_data'})
-        gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(linearly_correlated_data), 100)
-    end
-    --]]
-
+    
     local zca_whitened_data
     zca_whitened_data, means, P, invP  = unsup.zca_whiten(linearly_correlated_data)
-    --[[ 
-    do
-        image.display({image=zca_whitened_data, zoom=2, legend='zca_whitened_data'})
-        image.display({image=pearson_correlation_coefficient(zca_whitened_data), zoom=2, min=-1, max=1, legend='corr_zca_whitened_data'})
-        gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(zca_whitened_data), 100)
-    end 
-    --]]
+   
     -- colour data
     local coloured_data
     coloured_data = unsup.zca_colour(zca_whitened_data, means, P, invP)
-    --[[ 
-    do
-        image.display({image=coloured_data, zoom=2, legend='coloured_data'})
-        image.display({image=pearson_correlation_coefficient(coloured_data), zoom=2, min=-1, max=1, legend='corr_coloured_data'})
-        gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(coloured_data), 100)
-    end 
-    --]]
- 
     local stat = torch.max(torch.abs(linearly_correlated_data - coloured_data))
     tester:assertlt(stat, 1e-10, 'rec_diff < 1e-10')
 end
@@ -120,15 +61,6 @@ end
 
 function mytest.zca_layer()
     local gaussian_white_data = torch.randn(1000, 300)
-    --[[ 
-    do
-        image.display({image=gaussian_white_data, zoom=2, legend='gaussian_white_data'})
-        image.display({image=pearson_correlation_coefficient(gaussian_white_data), zoom=2, min=-1, max=1,   legend='corr_gaussian_white_data'})
-        gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(gaussian_white_data), 100)
-    end
-    --]]
-
     local l = nn.Linear(gaussian_white_data:size(2),gaussian_white_data:size(2))
     l.weight:copy(torch.lt(torch.rand(l.weight:size()), 1/math.sqrt(gaussian_white_data:size(2))):double())
     l.bias:fill(0)
@@ -137,7 +69,7 @@ function mytest.zca_layer()
     zca_whitened_data, means, P, invP  = unsup.zca_whiten(linearly_correlated_data)
     local layer = unsup.zca_layer(linearly_correlated_data)
     local layer_output = layer:forward(linearly_correlated_data)
-    local stat = torch.max(torch.abs(linearly_correlated_data - layer_output))
+    local stat = torch.max(torch.abs(zca_whitened_data - layer_output))
     tester:assertlt(stat, 1e-10, 'rec_diff < 1e-10')
 end
 
