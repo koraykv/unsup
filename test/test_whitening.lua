@@ -106,15 +106,15 @@ function mytest.zca_colour()
     coloured_data = unsup.zca_colour(zca_whitened_data, means, P, invP)
     --[[ 
     do
-        image.display({image=zca_whitened_data, zoom=2, legend='zca_whitened_data'})
-        image.display({image=pearson_correlation_coefficient(zca_whitened_data), zoom=2, min=-1, max=1, legend='corr_zca_whitened_data'})
+        image.display({image=coloured_data, zoom=2, legend='coloured_data'})
+        image.display({image=pearson_correlation_coefficient(coloured_data), zoom=2, min=-1, max=1, legend='corr_coloured_data'})
         gnuplot.figure()
-        gnuplot.hist(pearson_correlation_coefficient(zca_whitened_data), 100)
+        gnuplot.hist(pearson_correlation_coefficient(coloured_data), 100)
     end 
     --]]
  
-    local stat = torch.mean(torch.pow(linearly_correlated_data - coloured_data, 2))
-    tester:assertlt(stat, 1e-3, 'rec_diff < 1e-3')
+    local stat = torch.max(torch.abs(linearly_correlated_data - coloured_data))
+    tester:assertlt(stat, 1e-10, 'rec_diff < 1e-10')
 end
 
 
