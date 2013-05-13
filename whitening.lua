@@ -51,15 +51,15 @@ function unsup.zca_colour(data, means, P, invP)
     local dims = data:size()
     local nsamples = dims[1]
     local n_dimensions = data:nElement() / nsamples
-    assert(params.means)
-    assert(params.invP)
+    assert(means)
+    assert(invP)
     if data:dim() >= 3 then
         auxdata:resize(nsamples, n_dimensions)
     end
-    -- remove the means
-    auxdata:add(torch.ger(torch.ones(nsamples), params.means):mul(-1))
     -- transform in ZCA space
-    auxdata = torch.mm(auxdata, params.invP)
+    auxdata = torch.mm(auxdata, invP)
+    -- remove the means
+    auxdata:add(torch.ger(torch.ones(nsamples), means))
 
     data:copy(auxdata:resizeAs(data))
     return auxdata, means, P, invP
