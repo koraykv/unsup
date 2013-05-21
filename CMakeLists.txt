@@ -19,6 +19,7 @@ SET(luasrc init.lua
     UnsupTrainer.lua
     pca.lua
     kmeans.lua
+    whitening.lua
     test/test_fista.lua)
 
 INCLUDE_DIRECTORIES(${Torch_SOURCE_INCLUDES})
