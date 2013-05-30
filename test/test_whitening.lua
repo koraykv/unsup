@@ -42,7 +42,7 @@ local function pearson_correlation_coefficient(data)
 end
  
 
-
+-- ZCA
 
 local function zca_whiten_test_data(linearly_correlated_data, gaussian_white_data)
     local zca_whitened_data, means, P, invP  = unsup.zca_whiten(linearly_correlated_data)
@@ -74,8 +74,6 @@ end
 local function zca_colour_test_data(linearly_correlated_data, gaussian_white_data)
     local zca_whitened_data
     zca_whitened_data, means, P, invP  = unsup.zca_whiten(linearly_correlated_data)
-   
-    -- colour data
     local coloured_data
     coloured_data = unsup.zca_colour(zca_whitened_data, means, P, invP)
     local stat = torch.max(torch.abs(linearly_correlated_data - coloured_data))
@@ -112,6 +110,9 @@ local function zca_layer_test_data(linearly_correlated_data, gaussian_white_data
     end
 end
 
+
+
+
 function mytest.zca_layer()
     do
         local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3})
@@ -130,30 +131,36 @@ function mytest.zca_layer()
 end
 
 
-function mytest.pca_whiten()
-    local gaussian_white_data = torch.randn(1000, 300)
-    
-    local l = nn.Linear(gaussian_white_data:size(2),gaussian_white_data:size(2))
-    l.weight:copy(torch.lt(torch.rand(l.weight:size()), 1/math.sqrt(gaussian_white_data:size(2))):double())
-    l.bias:fill(0)
-    local linearly_correlated_data = l:forward(gaussian_white_data)
-    
-    local pca_whitened_data
-    pca_whitened_data, means, P, invP  = unsup.pca_whiten(linearly_correlated_data)
+-- PCA
+
+local function pca_whiten_test_data(linearly_correlated_data, gaussian_white_data)
+    local pca_whitened_data, means, P, invP  = unsup.pca_whiten(linearly_correlated_data)
     local stat = torch.mean(torch.pow(pearson_correlation_coefficient(pca_whitened_data)
                                             - pearson_correlation_coefficient(gaussian_white_data), 2))
-    tester:assertlt(stat, 1e-2, 'corr_diff < 1e-2')
+    tester:assertlt(stat, 1e-3, 'corr_diff < 1e-2')
 end
 
 
-function mytest.pca_colour()
-    local gaussian_white_data = torch.randn(1000, 300)
+function mytest.pca_whiten()
+    do 
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10000, 60})
+        pca_whiten_test_data(linearly_correlated_data, gaussian_white_data)
+    end
     
-    local l = nn.Linear(gaussian_white_data:size(2),gaussian_white_data:size(2))
-    l.weight:copy(torch.lt(torch.rand(l.weight:size()), 1/math.sqrt(gaussian_white_data:size(2))):double())
-    l.bias:fill(0)
-    local linearly_correlated_data = l:forward(gaussian_white_data)
+    do 
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10000, 10, 6})
+        pca_whiten_test_data(linearly_correlated_data, gaussian_white_data)
+    end
     
+    do 
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10000, 3, 4, 5})
+        pca_whiten_test_data(linearly_correlated_data, gaussian_white_data)
+    end
+
+end
+
+
+local function pca_colour_test_data(linearly_correlated_data, gaussian_white_data)
     local pca_whitened_data
     pca_whitened_data, means, P, invP  = unsup.pca_whiten(linearly_correlated_data)
    
@@ -164,19 +171,51 @@ function mytest.pca_colour()
     tester:assertlt(stat, 1e-10, 'rec_diff < 1e-10')
 end
 
+function mytest.pca_colour()
+    do
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3})
+        pca_colour_test_data(linearly_correlated_data, gaussian_white_data)
+    end
+    
+    do
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3, 4})
+        pca_colour_test_data(linearly_correlated_data, gaussian_white_data)
+    end
+    
+    do
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3, 2, 3})
+        pca_colour_test_data(linearly_correlated_data, gaussian_white_data)
+    end
+end
 
-function mytest.pca_layer()
-    local gaussian_white_data = torch.randn(1000, 300)
-    local l = nn.Linear(gaussian_white_data:size(2),gaussian_white_data:size(2))
-    l.weight:copy(torch.lt(torch.rand(l.weight:size()), 1/math.sqrt(gaussian_white_data:size(2))):double())
-    l.bias:fill(0)
-    local linearly_correlated_data = l:forward(gaussian_white_data)
-    local pca_whitened_data
-    pca_whitened_data, means, P, invP  = unsup.pca_whiten(linearly_correlated_data)
+
+local function pca_layer_test_data(linearly_correlated_data, gaussian_white_data)
+    local pca_whitened_data, means, P, invP  = unsup.pca_whiten(linearly_correlated_data)
     local layer = unsup.pca_layer(linearly_correlated_data)
     local layer_output = layer:forward(linearly_correlated_data)
     local stat = torch.max(torch.abs(pca_whitened_data - layer_output))
     tester:assertlt(stat, 1e-10, 'rec_diff < 1e-10')
+    tester:asserteq(linearly_correlated_data:nDimension(), layer_output:nDimension(), 'input and output have the same number of dimensions')
+    for i=1,linearly_correlated_data:nDimension() do
+        tester:asserteq(linearly_correlated_data:size(i), layer_output:size(i), 'input and output match on dimension '..tostring(i))
+    end
+end
+
+function mytest.pca_layer()
+    do
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3})
+        pca_layer_test_data(linearly_correlated_data, gaussian_white_data)
+    end
+    
+    do
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3, 4})
+        pca_layer_test_data(linearly_correlated_data, gaussian_white_data)
+    end
+    
+    do
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3, 2, 3})
+        pca_layer_test_data(linearly_correlated_data, gaussian_white_data)
+    end
 end
 
 
