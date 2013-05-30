@@ -30,7 +30,7 @@ local function pearson_correlation_coefficient(data)
     local corr = torch.Tensor(auxdata:size(2), auxdata:size(2))
 
     local means = torch.mean(auxdata, 1):squeeze()
-    local stds = torch.std(auxdata, 1):squeeze():add(1e-10)
+    local stds = torch.std(auxdata, 1):squeeze():add(1e-30)
 
     for i=1,auxdata:size(2) do
         for j=i,auxdata:size(2) do
@@ -48,23 +48,23 @@ local function zca_whiten_test_data(linearly_correlated_data, gaussian_white_dat
     local zca_whitened_data, means, P, invP  = unsup.zca_whiten(linearly_correlated_data)
     local stat = torch.mean(torch.pow(pearson_correlation_coefficient(zca_whitened_data)
                                             - pearson_correlation_coefficient(gaussian_white_data), 2))
-    tester:assertlt(stat, 1e-2, 'corr_diff < 1e-2')
+    tester:assertlt(stat, 1e-3, 'corr_diff < 1e-2')
 end
 
 
 function mytest.zca_whiten()
     do 
-        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3})
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10000, 60})
         zca_whiten_test_data(linearly_correlated_data, gaussian_white_data)
     end
     
     do 
-        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3, 4})
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10000, 10, 6})
         zca_whiten_test_data(linearly_correlated_data, gaussian_white_data)
     end
     
     do 
-        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10, 3, 2, 4})
+        local linearly_correlated_data, gaussian_white_data = get_correlated_data({10000, 3, 4, 5})
         zca_whiten_test_data(linearly_correlated_data, gaussian_white_data)
     end
 
