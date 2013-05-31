@@ -20,7 +20,7 @@ local function get_correlated_data(sizes)
     l.weight:copy(torch.lt(torch.rand(l.weight:size()), 1/math.sqrt(n_dimensions)):double())
     l.bias:fill(0)
     local linearly_correlated_data = l:forward(gaussian_white_data):resize(sizes)
-    return linearly_correlated_data, gaussian_white_data:resize(sizes)
+    return linearly_correlated_data:resize(sizes), gaussian_white_data:resize(sizes)
 end
 
 
@@ -135,11 +135,24 @@ local function zca_inv_layer_test_data(linearly_correlated_data, gaussian_white_
     local zca_whitened_data, means, P, invP  = unsup.zca_whiten(linearly_correlated_data)
     local layer = unsup.inv_zca_layer(linearly_correlated_data)
     local layer_output = layer:forward(zca_whitened_data)
-    local stat = torch.max(torch.abs(linearly_correlated_data - layer_output))
-    tester:assertlt(stat, 1e-10, 'rec_diff < 1e-10')
-    tester:asserteq(linearly_correlated_data:nDimension(), layer_output:nDimension(), 'input and output have the same number of dimensions')
-    for i=1,linearly_correlated_data:nDimension() do
-        tester:asserteq(linearly_correlated_data:size(i), layer_output:size(i), 'input and output match on dimension '..tostring(i))
+    -- compare output to original data
+    do 
+        local stat = torch.max(torch.abs(linearly_correlated_data - layer_output))
+        tester:assertlt(stat, 1e-10, 'rec_diff < 1e-10')
+        tester:asserteq(linearly_correlated_data:nDimension(), layer_output:nDimension(), 'input and output have the same number of dimensions')
+        for i=1,linearly_correlated_data:nDimension() do
+            tester:asserteq(linearly_correlated_data:size(i), layer_output:size(i), 'input and output match on dimension '..tostring(i))
+        end
+    end
+    -- compare output to output of colouring
+    local zca_coloured_data  = unsup.zca_colour(zca_whitened_data, means, P, invP)
+    do 
+        local stat = torch.max(torch.abs(zca_coloured_data - layer_output))
+        tester:assertlt(stat, 1e-10, 'rec_diff < 1e-10')
+        tester:asserteq(zca_coloured_data:nDimension(), layer_output:nDimension(), 'input and output have the same number of dimensions')
+        for i=1,zca_coloured_data:nDimension() do
+            tester:asserteq(zca_coloured_data:size(i), layer_output:size(i), 'input and output match on dimension '..tostring(i))
+        end
     end
 end
 
