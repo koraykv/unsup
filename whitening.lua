@@ -65,19 +65,53 @@ end
 
 
 -- Function computes return a linear layer which applies a ZCA transform 
--- to its input using a prec-computed (static) transformation matrix. 
+-- to its input using a precomputed (static) transformation matrix. 
 -- if not specified, the transformation parameters are computed from data
 function unsup.zca_layer(data, means, P, invP)
     local auxdata
-    if not means or not P then 
+    if not means or not P or not invP then 
         auxdata, means, P, invP  = unsup.zca_whiten(data)
     end
-    local layer = nn.Linear(data:size(2), data:size(2))
-    layer.weight:copy(P:t())
-    layer.bias:fill(0)
-    layer.bias:copy(layer:forward(means):mul(-1))
+    local n_dimensions = data:nElement() / data:size(1)
+    local linear = nn.Linear(n_dimensions, n_dimensions)
+    linear.weight:copy(P:t())
+    linear.bias:fill(0)
+    linear.bias:copy(linear:forward(means):mul(-1))
+    local layer
+    if data:nDimension() > 2 then 
+        layer = nn.Sequential()
+        layer:add(nn.Reshape(data:size(1), n_dimensions))
+        layer:add(linear)
+        layer:add(nn.Reshape(data:size()))
+    else
+        layer = linear
+    end
     return layer, means, P, invP
 end
+-- Function computes return a linear layer which inverts a ZCA transform 
+-- of its input using a precomputed (static) transformation matrix. 
+-- if not specified, the transformation parameters are computed from data
+function unsup.inv_zca_layer(data, means, P, invP)
+    local auxdata
+    if not means or not P or not invP then 
+        auxdata, means, P, invP  = unsup.zca_whiten(data)
+    end
+    local n_dimensions = data:nElement() / data:size(1)
+    local linear = nn.Linear(n_dimensions, n_dimensions)
+    linear.weight:copy(invP:t())
+    linear.bias:copy(means)
+    local layer
+    if data:nDimension() > 2 then 
+        layer = nn.Sequential()
+        layer:add(nn.Reshape(data:size(1), n_dimensions))
+        layer:add(linear)
+        layer:add(nn.Reshape(data:size()))
+    else
+        layer = linear
+    end
+    return layer, means, P, invP
+end
+
 
 -- PCA-Whitening
 --
@@ -149,13 +183,48 @@ end
 -- if not specified, the transformation parameters are computed from data
 function unsup.pca_layer(data, means, P, invP)
     local auxdata
-    if not means or not P then 
+    if not means or not P or not invP then 
         auxdata, means, P, invP  = unsup.pca_whiten(data)
     end
-    local layer = nn.Linear(data:size(2), data:size(2))
-    layer.weight:copy(P:t())
-    layer.bias:fill(0)
-    layer.bias:copy(layer:forward(means):mul(-1))
+    local n_dimensions = data:nElement() / data:size(1)
+    local linear = nn.Linear(n_dimensions, n_dimensions)
+    linear.weight:copy(P:t())
+    linear.bias:fill(0)
+    linear.bias:copy(linear:forward(means):mul(-1))
+    local layer
+    if data:nDimension() > 2 then 
+        layer = nn.Sequential()
+        layer:add(nn.Reshape(data:size(1), n_dimensions))
+        layer:add(linear)
+        layer:add(nn.Reshape(data:size()))
+    else
+        layer = linear
+    end
+    return layer, means, P, invP
+end
+
+
+-- Function computes return a linear layer which inverts a PCA transform 
+-- of its input using a precomputed (static) transformation matrix. 
+-- if not specified, the transformation parameters are computed from data
+function unsup.inv_pca_layer(data, means, P, invP)
+    local auxdata
+    if not means or not P or not invP then 
+        auxdata, means, P, invP  = unsup.pca_whiten(data)
+    end
+    local n_dimensions = data:nElement() / data:size(1)
+    local linear = nn.Linear(n_dimensions, n_dimensions)
+    linear.weight:copy(invP:t())
+    linear.bias:copy(means)
+    local layer
+    if data:nDimension() > 2 then 
+        layer = nn.Sequential()
+        layer:add(nn.Reshape(data:size(1), n_dimensions))
+        layer:add(linear)
+        layer:add(nn.Reshape(data:size()))
+    else
+        layer = linear
+    end
     return layer, means, P, invP
 end
 
