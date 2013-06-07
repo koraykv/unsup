@@ -1,4 +1,3 @@
-
 --
 -- The k-means algorithm.
 --
@@ -13,8 +12,11 @@
 --
 function unsup.kmeans(x, k, std, niter, batchsize, callback, verbose)
    -- args
-   batchsize = batchsize or 1000
+   x = x or error('missing argument: unsup.kmeans(Tensor(npoints,dim), k [, std, niter, batchsize, callback, verbose])')
+   k = k or error('missing argument: unsup.kmeans(Tensor(npoints,dim), k [, std, niter, batchsize, callback, verbose])')
    std = std or 0.1
+   niter = niter or 1
+   batchsize = batchsize or 1000
 
    -- some shortcuts
    local sum = torch.sum
