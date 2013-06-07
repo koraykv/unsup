@@ -8,15 +8,15 @@
 --   > callback: optional callback, at each iteration end
 --   > verbose: prints a progress bar...
 --
---   < returns the k means (centroids)
+--   < returns the k means (centroids) + the counts per centroid
 --
-function unsup.kmeans(x, k, std, niter, batchsize, callback, verbose)
+function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
    -- args
-   x = x or error('missing argument: unsup.kmeans(Tensor(npoints,dim), k [, std, niter, batchsize, callback, verbose])')
-   k = k or error('missing argument: unsup.kmeans(Tensor(npoints,dim), k [, std, niter, batchsize, callback, verbose])')
-   std = std or 0.1
+   local help = 'centroids,count = unsup.kmeans(Tensor(npoints,dim), k [, niter, batchsize, callback, verbose])'
+   x = x or error('missing argument: ' .. help)
+   k = k or error('missing argument: ' .. help)
    niter = niter or 1
-   batchsize = batchsize or 1000
+   batchsize = batchsize or math.min(1000, (#x)[1])
 
    -- some shortcuts
    local sum = torch.sum
@@ -31,7 +31,10 @@ function unsup.kmeans(x, k, std, niter, batchsize, callback, verbose)
 
    -- initialize means
    local x2 = sum(pow(x,2),2)
-   local centroids = randn(k,ndims)*std
+   local centroids = randn(k,ndims)
+   for i = 1,k do
+      centroids[i]:div(centroids[i]:norm())
+   end
    local totalcounts = zeros(k)
 
    -- do niter iterations
