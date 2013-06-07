@@ -11,7 +11,8 @@
 --
 -- Input arguments are never changed.
 --
-function unsup.zca_whiten(data, means, P, invP)
+function unsup.zca_whiten(data, means, P, invP, epsilon)
+    local epsilon = epsilon or 1e-5
     local auxdata = data:clone()
     local dims = data:size()
     local nsamples = dims[1]
@@ -24,7 +25,7 @@ function unsup.zca_whiten(data, means, P, invP)
         means = torch.mean(auxdata, 1):squeeze()
         -- compute transformation matrix P if not provided
         local ce, cv = unsup.pcacov(auxdata)
-        ce:add(1e-5):sqrt()
+        ce:add(epsilon):sqrt()
         local invce = ce:clone():pow(-1)
         local invdiag = torch.diag(invce)
         P = torch.mm(cv, invdiag)
