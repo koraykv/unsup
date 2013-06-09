@@ -60,7 +60,7 @@ function unsup.zca_colour(data, means, P, invP)
     -- remove the means
     auxdata:add(torch.ger(torch.ones(nsamples), means))
 
-    auxdata:copy(auxdata:resizeAs(data))
+    auxdata:resizeAs(data)
     return auxdata, means, P, invP
 end
 
@@ -174,7 +174,7 @@ function unsup.pca_colour(data, means, P, invP)
     -- add back the means
     auxdata:add(torch.ger(torch.ones(nsamples), means))
 
-    auxdata:copy(auxdata:resizeAs(data))
+    auxdata:resizeAs(data)
     return auxdata, means, P, invP
 end
 
