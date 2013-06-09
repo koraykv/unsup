@@ -18,6 +18,13 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
    niter = niter or 1
    batchsize = batchsize or math.min(1000, (#x)[1])
 
+   -- resize data
+   local k_size = x:size()
+   k_size[1] = k
+   if x:dim() > 2 then
+      x = x:reshape(x:size(1), x:nElement()/x:size(1))
+   end
+
    -- some shortcuts
    local sum = torch.sum
    local max = torch.max
@@ -36,6 +43,9 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
       centroids[i]:div(centroids[i]:norm())
    end
    local totalcounts = zeros(k)
+      
+   -- callback?
+   if callback then callback(0,centroids:reshape(k_size),totalcounts) end
 
    -- do niter iterations
    for i = 1,niter do
@@ -86,9 +96,12 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
       totalcounts:add(counts)
 
       -- callback?
-      if callback then callback(centroids) end
+      if callback then 
+         local ret = callback(i,centroids:reshape(k_size),totalcounts) 
+         if ret then break end
+      end
    end
 
    -- done
-   return centroids,totalcounts
+   return centroids:reshape(k_size),totalcounts
 end
