@@ -37,7 +37,8 @@ function unsup.zca_whiten(data, means, P, invP, epsilon)
         invP = torch.mm(invP, cv:t())
     end
     -- remove the means
-    auxdata:add(torch.ger(torch.ones(nsamples), means):mul(-1))
+    local xmeans = means:new():resize(1,n_dimensions):expand(nsamples,n_dimensions)
+    auxdata:add(-1, xmeans)
     -- transform in ZCA space
     auxdata = torch.mm(auxdata, P)
 
@@ -57,8 +58,9 @@ function unsup.zca_colour(data, means, P, invP)
     end
     -- transform in ZCA space
     auxdata = torch.mm(auxdata, invP)
-    -- remove the means
-    auxdata:add(torch.ger(torch.ones(nsamples), means))
+    -- add back the means
+    local xmeans = means:new():resize(1,n_dimensions):expand(nsamples,n_dimensions)
+    auxdata:add(xmeans)
 
     auxdata:resizeAs(data)
     return auxdata, means, P, invP
@@ -151,7 +153,8 @@ function unsup.pca_whiten(data, means, P, invP)
         invP = torch.mm(diag, cv:t())
     end
     -- remove the means
-    auxdata:add(torch.ger(torch.ones(nsamples), means):mul(-1))
+    local xmeans = means:new():resize(1,n_dimensions):expand(nsamples,n_dimensions)
+    auxdata:add(-1, xmeans)
     -- transform in ZCA space
     auxdata = torch.mm(auxdata, P)
 
@@ -172,7 +175,8 @@ function unsup.pca_colour(data, means, P, invP)
     -- transform in PCA space
     auxdata = torch.mm(auxdata, invP)
     -- add back the means
-    auxdata:add(torch.ger(torch.ones(nsamples), means))
+    local xmeans = means:new():resize(1,n_dimensions):expand(nsamples,n_dimensions)
+    auxdata:add(xmeans)
 
     auxdata:resizeAs(data)
     return auxdata, means, P, invP
