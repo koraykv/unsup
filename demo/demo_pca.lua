@@ -1,3 +1,4 @@
+require 'unsup'
 
 function gauss1d(n,mean,std)
    mean = mean or 0

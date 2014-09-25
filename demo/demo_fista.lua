@@ -3,6 +3,7 @@ require 'image'
 require 'gnuplot'
 
 dofile 'demo_data.lua'
+dofile 'demo_utils.lua'
 if not arg then arg = {} end
 
 cmd = torch.CmdLine()
@@ -59,7 +60,7 @@ else
 end
 
 -- do learrning rate hacks
-kex.nnhacks()
+nnhacks()
 
 function train(module,dataset)
 

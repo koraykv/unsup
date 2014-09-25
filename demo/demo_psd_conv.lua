@@ -62,7 +62,7 @@ if not paths.filep(params.data) then
 end
 
 local rundir = cmd:string('psd', params, {dir=true,lambda=false,encoderType=false,kernelsize=false})
-params.rundir = params.dir .. '/' .. rundir
+params.rundir = paths.concat(params.dir,rundir)
 
 if paths.dirp(params.rundir) then
    error('This experiment is already done!!!')
@@ -70,7 +70,7 @@ end
 
 os.execute('mkdir -p ' .. params.rundir)
 cmd:addTime('psd')
-cmd:log(params.rundir .. '/log', params)
+cmd:log(paths.concat(params.rundir, 'log'), params)
 
 -- init random number generator
 torch.manualSeed(params.seed)
@@ -134,7 +134,7 @@ end
 function trainer:hookEpoch(epoch)
    local function plot(x,title,xl,yl,fname)
       -- plot training error
-      gnuplot.pngfigure(params.rundir .. '/' .. fname)
+      gnuplot.pngfigure(paths.concat(params.rundir,fname))
       gnuplot.plot(x:narrow(1,1,math.max(epoch,2)),'+-')
       gnuplot.title(title)
       gnuplot.xlabel(xl)
@@ -151,9 +151,12 @@ function trainer:hookEpoch(epoch)
    plot(logs.sparsity,'Sparsity Error', xlabel,'Sparsity Error','sparsity.png')
 
    -- store model
-   os.execute('mkdir -p ' .. params.rundir .. '/models')
-   os.execute('mv -f ' .. params.rundir .. '/models/model.bin ' .. params.rundir .. '/models/model_last.bin')
-   torch.save(params.rundir .. '/models/model.bin',mlp)
+   print('Storing model to: ' .. paths.concat(params.rundir,'models'))
+   os.execute('mkdir -p ' .. paths.concat(params.rundir,'models'))   
+   if paths.filep(paths.concat(params.rundir, 'models/model.bin')) then
+      os.execute('mv -f "' .. paths.concat(params.rundir, 'models/model.bin') .. '" "' .. paths.concat(params.rundir,'models/model_last.bin') .. '"')
+   end
+   torch.save(paths.concat(params.rundir,'models/model.bin'),mlp)
 
    -- plot filters
    local we
@@ -165,15 +168,15 @@ function trainer:hookEpoch(epoch)
    local wd = mlp.decoder.D.weight
    local de = image.toDisplayTensor({input=we,nrow=math.ceil(math.sqrt(we:size(1))),symmetric=true,padding=1})
    local dd = image.toDisplayTensor({input=wd,nrow=math.ceil(math.sqrt(wd:size(1))),symmetric=true,padding=1})
-   image.saveJPG(params.rundir .. '/filters_dec_' .. epoch .. '.jpg',dd)
-   image.saveJPG(params.rundir .. '/filters_enc_' .. epoch .. '.jpg',de)
+   image.saveJPG(paths.concat(params.rundir, 'filters_dec_' .. epoch .. '.jpg'),dd)
+   image.saveJPG(paths.concat(params.rundir,'filters_enc_' .. epoch .. '.jpg'),de)
 end
 if params.hessianinterval == 0 then params.hessianinterval = nil end
 
 print('Starting Training')
 function train()
-   os.execute('mkdir -p ' .. params.rundir .. '/source')
-   os.execute('cp *.lua ' .. params.rundir .. '/source/.')
+   os.execute('mkdir -p ' .. paths.concat(params.rundir,'source'))
+   os.execute('cp *.lua ' .. paths.concat(params.rundir,'source/.'))
    trainer:train{eta=params.eta,
 		 etadecay = params.etadecay,
 		 etadecayinterval = params.etadecayinterval,
@@ -194,6 +197,6 @@ else
    print('Training done')
 end
 print('Saving mlp')
-torch.save(params.rundir .. '/model.bin',mlp)
-torch.save(params.rundir .. '/tr.bin',trainer)
+torch.save(paths.concat(params.rundir,'model.bin'),mlp)
+torch.save(paths.concat(params.rundir,'tr.bin'),trainer)
 

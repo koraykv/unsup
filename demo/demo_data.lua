@@ -1,7 +1,11 @@
-
 local data_verbose = false
 
 function getdata(datafile, inputsize, std)
+   if datafile == 'tr-berkeley-N5K-M56x56-lcn.bin' and (not paths.filep(datafile)) then
+      print('data not found, downloading:')
+      os.execute('wget -c http://cs.nyu.edu/~koray/publis/code/tr-berkeley-N5K-M56x56-lcn.bin')
+   end
+
    local data = torch.DiskFile(datafile,'r'):binary():readObject()
    local dataset ={}
 
