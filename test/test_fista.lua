@@ -32,7 +32,7 @@ else
    dofista = not dofista
 end
 
-random.manualSeed(seed)
+torch.manualSeed(seed)
 math.randomseed(seed)
 nc = 3
 ni = 30
@@ -56,7 +56,7 @@ mixi = torch.Tensor(nc)
 mixj = torch.Tensor(nc)
 for i=1,nc do
    local ii = math.random(1,no)
-   local cc = random.uniform(0,1/nc)
+   local cc = torch.uniform(0,1/nc)
    mixi[i] = ii;
    mixj[i] = cc;
    print(ii,cc)
