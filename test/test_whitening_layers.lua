@@ -1,5 +1,4 @@
 require 'torch'
-require 'torch-env'
 require 'dataset'
 require 'dataset/cifar10'
 require 'image'
