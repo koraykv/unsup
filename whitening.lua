@@ -18,7 +18,7 @@ function unsup.zca_whiten(data, means, P, invP, epsilon)
     local nsamples = dims[1]
     local n_dimensions = data:nElement() / nsamples
     if data:dim() >= 3 then
-        auxdata:view(nsamples, n_dimensions)
+       auxdata = auxdata:view(nsamples, n_dimensions)
     end
     if not means or not P or not invP then 
         -- compute mean vector if not provided 
@@ -54,7 +54,7 @@ function unsup.zca_colour(data, means, P, invP)
     assert(means)
     assert(invP)
     if data:dim() >= 3 then
-        auxdata:view(nsamples, n_dimensions)
+       auxdata = auxdata:view(nsamples, n_dimensions)
     end
     -- transform in ZCA space
     auxdata = torch.mm(auxdata, invP)
@@ -136,7 +136,7 @@ function unsup.pca_whiten(data, means, P, invP)
     local nsamples = dims[1]
     local n_dimensions = data:nElement() / nsamples
     if data:dim() >= 3 then
-        auxdata:view(nsamples, n_dimensions)
+       auxdata = auxdata:view(nsamples, n_dimensions)
     end
     if not means or not P then
         -- compute mean vector if not provided 
@@ -170,7 +170,7 @@ function unsup.pca_colour(data, means, P, invP)
     assert(means)
     assert(invP)
     if data:dim() >= 3 then
-        auxdata:view(nsamples, n_dimensions)
+       auxdata = auxdata:view(nsamples, n_dimensions)
     end
     -- transform in PCA space
     auxdata = torch.mm(auxdata, invP)
