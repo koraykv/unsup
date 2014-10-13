@@ -18,7 +18,7 @@ function unsup.zca_whiten(data, means, P, invP, epsilon)
     local nsamples = dims[1]
     local n_dimensions = data:nElement() / nsamples
     if data:dim() >= 3 then
-        auxdata:resize(nsamples, n_dimensions)
+        auxdata:view(nsamples, n_dimensions)
     end
     if not means or not P or not invP then 
         -- compute mean vector if not provided 
@@ -37,7 +37,7 @@ function unsup.zca_whiten(data, means, P, invP, epsilon)
         invP = torch.mm(invP, cv:t())
     end
     -- remove the means
-    local xmeans = means:new():resize(1,n_dimensions):expand(nsamples,n_dimensions)
+    local xmeans = means:new():view(1,n_dimensions):expand(nsamples,n_dimensions)
     auxdata:add(-1, xmeans)
     -- transform in ZCA space
     auxdata = torch.mm(auxdata, P)
@@ -54,12 +54,12 @@ function unsup.zca_colour(data, means, P, invP)
     assert(means)
     assert(invP)
     if data:dim() >= 3 then
-        auxdata:resize(nsamples, n_dimensions)
+        auxdata:view(nsamples, n_dimensions)
     end
     -- transform in ZCA space
     auxdata = torch.mm(auxdata, invP)
     -- add back the means
-    local xmeans = means:new():resize(1,n_dimensions):expand(nsamples,n_dimensions)
+    local xmeans = means:new():view(1,n_dimensions):expand(nsamples,n_dimensions)
     auxdata:add(xmeans)
 
     auxdata:resizeAs(data)
@@ -136,7 +136,7 @@ function unsup.pca_whiten(data, means, P, invP)
     local nsamples = dims[1]
     local n_dimensions = data:nElement() / nsamples
     if data:dim() >= 3 then
-        auxdata:resize(nsamples, n_dimensions)
+        auxdata:view(nsamples, n_dimensions)
     end
     if not means or not P then
         -- compute mean vector if not provided 
@@ -153,7 +153,7 @@ function unsup.pca_whiten(data, means, P, invP)
         invP = torch.mm(diag, cv:t())
     end
     -- remove the means
-    local xmeans = means:new():resize(1,n_dimensions):expand(nsamples,n_dimensions)
+    local xmeans = means:new():view(1,n_dimensions):expand(nsamples,n_dimensions)
     auxdata:add(-1, xmeans)
     -- transform in ZCA space
     auxdata = torch.mm(auxdata, P)
@@ -170,12 +170,12 @@ function unsup.pca_colour(data, means, P, invP)
     assert(means)
     assert(invP)
     if data:dim() >= 3 then
-        auxdata:resize(nsamples, n_dimensions)
+        auxdata:view(nsamples, n_dimensions)
     end
     -- transform in PCA space
     auxdata = torch.mm(auxdata, invP)
     -- add back the means
-    local xmeans = means:new():resize(1,n_dimensions):expand(nsamples,n_dimensions)
+    local xmeans = means:new():view(1,n_dimensions):expand(nsamples,n_dimensions)
     auxdata:add(xmeans)
 
     auxdata:resizeAs(data)
