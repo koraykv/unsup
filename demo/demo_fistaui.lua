@@ -90,7 +90,7 @@ function train(module,dataset)
    
    local err = 0
    local iter = 0
-   ww = ww or qtwidget.newwindow(600,200)
+   ww = ww or qtwidget.newwindow(850,300)
    local ts = torch.tic()
    
    for t = 1,params.maxiter do
@@ -115,7 +115,7 @@ function train(module,dataset)
          local imh = imc:size(imc:dim()-1)*zoom
          image.display{win=ww,image=imc,x=10,y=60,zoom=zoom, symmetric=false,gui=false}
          image.display{win=ww,image=im,x=10+imw+10,y=60,zoom=zoom, symmetric=true,gui=false}
-         image.display{win=ww,image=dd,gui=false,padding=1,nrow=8,symetric=true,x=10+imw+10+imw+10, y=60,zoom=2}
+         image.display{win=ww,image=dd,gui=false,padding=1,nrow=8,symetric=true,x=10+imw+10+imw+10, y=60,zoom=zoom}
          ww:moveto(10,60+imh+30)
          ww:show(string.format('%6.2f ex/s',t/torch.toc(ts)))
          ww:gend()
