@@ -57,7 +57,8 @@ if params.inputsize == params.kernelsize and params.conv == false then
    mlp = unsup.LinearPSD(params.inputsize*params.inputsize, params.nfiltersout, params.lambda, params.beta )
 else
    print('Convolutional psd')
-   mlp = unsup.ConvPSD(params.nfiltersin, params.nfiltersout, params.kernelsize, params.kernelsize, params.inputsize, params.inputsize, params.lambda, params.beta)
+   local conntable = nn.tables.full(params.nfiltersin, params.nfiltersout)
+   mlp = unsup.ConvPSD(conntable, params.kernelsize, params.kernelsize, params.inputsize, params.inputsize, params.lambda, params.beta)
    -- convert dataset to convolutional
    data:conv()
 end
@@ -95,58 +96,58 @@ function train(module,dataset)
       iter = iter + siter
 
       if math.fmod(t , params.statinterval) == 0 then
-	 avTrainingError[t/params.statinterval] = err/params.statinterval
-	 avFistaIterations[t/params.statinterval] = iter/params.statinterval
+	     avTrainingError[t/params.statinterval] = err/params.statinterval
+	     avFistaIterations[t/params.statinterval] = iter/params.statinterval
 
-	 -- report
-	 print('# iter=' .. t .. ' eta = ( ' .. currentLearningRate[1] .. ', ' .. currentLearningRate[2] .. ' ) current error = ' .. err)
+	     -- report
+	     print('# iter=' .. t .. ' eta = ( ' .. currentLearningRate[1] .. ', ' .. currentLearningRate[2] .. ' ) current error = ' .. err)
 
-	 -- plot training error
-	 gnuplot.pngfigure(params.rundir .. '/error.png')
-	 gnuplot.plot(avTrainingError:narrow(1,1,math.max(t/params.statinterval,2)))
-	 gnuplot.title('Training Error')
-	 gnuplot.xlabel('# iterations / ' .. params.statinterval)
-	 gnuplot.ylabel('Cost')
-	 -- plot training error
-	 gnuplot.pngfigure(params.rundir .. '/iter.png')
-	 gnuplot.plot(avFistaIterations:narrow(1,1,math.max(t/params.statinterval,2)))
-	 gnuplot.title('Fista Iterations')
-	 gnuplot.xlabel('# iterations / ' .. params.statinterval)
-	 gnuplot.ylabel('Fista Iterations')
-	 gnuplot.plotflush()
-	 gnuplot.closeall()
+	     -- plot training error
+	     gnuplot.pngfigure(params.rundir .. '/error.png')
+	     gnuplot.plot(avTrainingError:narrow(1,1,math.max(t/params.statinterval,2)))
+	     gnuplot.title('Training Error')
+	     gnuplot.xlabel('# iterations / ' .. params.statinterval)
+	     gnuplot.ylabel('Cost')
+	     -- plot training error
+	     gnuplot.pngfigure(params.rundir .. '/iter.png')
+	     gnuplot.plot(avFistaIterations:narrow(1,1,math.max(t/params.statinterval,2)))
+	     gnuplot.title('Fista Iterations')
+	     gnuplot.xlabel('# iterations / ' .. params.statinterval)
+	     gnuplot.ylabel('Fista Iterations')
+	     gnuplot.plotflush()
+	     gnuplot.closeall()
 
-	 -- plot filters
-	 local dd,de
-	 if torch.typename(mlp) == 'unsup.LinearPSD' then
-	    dd = image.toDisplayTensor{input=mlp.decoder.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}
-	    de = image.toDisplayTensor{input=mlp.encoder.weight:unfold(2,9,9),padding=1,nrow=8,symmetric=true}
-	 else
-	    de = image.toDisplayTensor{input=mlp.encoder.weight,padding=1,nrow=8,symmetric=true}
-	    dd = image.toDisplayTensor{input=mlp.decoder.D.weight,padding=1,nrow=8,symmetric=true}
-	 end
-	 image.saveJPG(params.rundir .. '/filters_dec_' .. t .. '.jpg',dd)
-	 image.saveJPG(params.rundir .. '/filters_enc_' .. t .. '.jpg',de)
+	     -- plot filters
+	     local dd,de
+	     if torch.typename(mlp) == 'unsup.LinearPSD' then
+	        dd = image.toDisplayTensor{input=mlp.decoder.D.weight:transpose(1,2):unfold(2,9,9),padding=1,nrow=8,symmetric=true}
+	        de = image.toDisplayTensor{input=mlp.encoder.weight:unfold(2,9,9),padding=1,nrow=8,symmetric=true}
+	     else
+	        de = image.toDisplayTensor{input=mlp.encoder.weight,padding=1,nrow=8,symmetric=true}
+	        dd = image.toDisplayTensor{input=mlp.decoder.D.weight,padding=1,nrow=8,symmetric=true}
+	     end
+	     image.saveJPG(params.rundir .. '/filters_dec_' .. t .. '.jpg',dd)
+	     image.saveJPG(params.rundir .. '/filters_enc_' .. t .. '.jpg',de)
 
-	 -- store model
-	 local mf = torch.DiskFile(params.rundir .. '/model_' .. t .. '.bin','w'):binary()
-	 mf:writeObject(module)
-	 mf:close()
+	     -- store model
+	     local mf = torch.DiskFile(params.rundir .. '/model_' .. t .. '.bin','w'):binary()
+	     mf:writeObject(module)
+	     mf:close()
 
-	 -- write training error
-	 local tf = torch.DiskFile(params.rundir .. '/error.mat','w'):binary()
-	 tf:writeObject(avTrainingError:narrow(1,1,t/params.statinterval))
-	 tf:close()
+	     -- write training error
+	     local tf = torch.DiskFile(params.rundir .. '/error.mat','w'):binary()
+	     tf:writeObject(avTrainingError:narrow(1,1,t/params.statinterval))
+	     tf:close()
 
-	 -- write # of iterations
-	 local ti = torch.DiskFile(params.rundir .. '/iter.mat','w'):binary()
-	 ti:writeObject(avFistaIterations:narrow(1,1,t/params.statinterval))
-	 ti:close()
+	     -- write # of iterations
+	     local ti = torch.DiskFile(params.rundir .. '/iter.mat','w'):binary()
+	     ti:writeObject(avFistaIterations:narrow(1,1,t/params.statinterval))
+	     ti:close()
 
-	 -- update learning rate with decay
-	 currentLearningRate = params.eta/(1+(t/params.statinterval)*params.decay)
-	 err = 0
-	 iter = 0
+	     -- update learning rate with decay
+	     currentLearningRate = params.eta/(1+(t/params.statinterval)*params.decay)
+	     err = 0
+	     iter = 0
       end
    end
 end
