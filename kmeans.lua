@@ -26,11 +26,9 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
    end
 
    -- some shortcuts
-   local sum = torch.sum
-   local max = torch.max
-   local pow = torch.pow
-   local randn = torch.randn
-   local zeros = torch.zeros
+   local sum = x.sum
+   local max = x.max
+   local pow = x.pow
 
    -- dims
    local nsamples = (#x)[1]
@@ -38,11 +36,11 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
 
    -- initialize means
    local x2 = sum(pow(x,2),2)
-   local centroids = randn(k,ndims)
+   local centroids = x.new(k,ndims):normal()
    for i = 1,k do
       centroids[i]:div(centroids[i]:norm())
    end
-   local totalcounts = zeros(k)
+   local totalcounts = x.new(k):zero()
       
    -- callback?
    if callback then callback(0,centroids:reshape(k_size),totalcounts) end
@@ -56,8 +54,8 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
       local c2 = sum(pow(centroids,2),2)*0.5
 
       -- init some variables
-      local summation = zeros(k,ndims)
-      local counts = zeros(k)
+      local summation = x.new(k,ndims):zero()
+      local counts = x.new(k):zero()
       local loss = 0
 
       -- process batch
@@ -77,7 +75,7 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
          loss = loss + sum(x2[{ {i,lasti} }]*0.5 - val:t())
 
          -- count examplars per template
-         local S = zeros(m,k)
+         local S = x.new(m,k):zero()
          for i = 1,(#labels)[2] do
             S[i][labels[1][i]] = 1
          end
