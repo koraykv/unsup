@@ -26,9 +26,9 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
    end
 
    -- some shortcuts
-   local sum = x.sum
-   local max = x.max
-   local pow = x.pow
+   local sum = torch.sum
+   local max = torch.max
+   local pow = torch.pow
 
    -- dims
    local nsamples = (#x)[1]
