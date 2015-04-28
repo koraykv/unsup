@@ -1,6 +1,5 @@
 local SpatialConvFistaL1, parent = torch.class('unsup.SpatialConvFistaL1','unsup.FistaL1')
--- inputFeatures   : number of input features
--- outputFeatures  : size of code (feature maps)
+-- conntable       : Connection table (ref: nn.SpatialConvolutionMap)
 -- kw              : width of convolutional kernel
 -- kh              : height of convolutional kernel
 -- iw              : width of input patches
