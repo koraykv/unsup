@@ -1,7 +1,6 @@
 local ConvPSD, parent = torch.class('unsup.ConvPSD','unsup.PSD')
 
 -- conntable       : A connection table (ref nn.SpatialConvolutionMap)
--- outputFeatures  : size of code (feature maps)
 -- kw, kh          : width, height of convolutional kernel
 -- iw, ih          : width, height of input patches
 -- lambda          : sparsity coefficient
