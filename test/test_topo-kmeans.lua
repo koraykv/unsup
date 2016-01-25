@@ -16,22 +16,22 @@ cmd:text()
 cmd:text('Get k-means templates on directory of images')
 cmd:text()
 cmd:text('Options')
-cmd:option('-datafile', 'http://data.neuflow.org/data/tr-berkeley-N5K-M56x56-lcn.bin', 'Dataset URL')
+cmd:option('-datafile', 'http://torch7.s3-website-us-east-1.amazonaws.com/data/tr-berkeley-N5K-M56x56-lcn.ascii', 'Dataset URL')
 cmd:option('-visualize', true, 'display kernels')
 cmd:option('-seed', 1, 'initial random seed')
 cmd:option('-threads', 8, 'threads')
 cmd:option('-inputsize', 9, 'size of each input patches') -- OL: 7x7
 cmd:option('-nkernels1', 256, 'number of kernels 1st layer') -- OL: 16
-cmd:option('-niter1', 1, 'nb of k-means iterations') -- ned fewer now because we 
+cmd:option('-niter1', 1, 'nb of k-means iterations') -- ned fewer now because we
 cmd:option('-batchsize', 1000, 'batch size for k-means\' inner loop')
 cmd:option('-nsamples', 10*1000, 'nb of random training samples')
 cmd:option('-initstd1', 0.1, 'standard deviation to generate random initial templates')
 cmd:text()
 opt = cmd:parse(arg or {}) -- pass parameters to rest of file:
 
---if not qt then
---   opt.visualize = false
---end
+if not pcall(require, 'qt') then
+  opt.visualize = false
+end
 
 torch.manualSeed(opt.seed)
 torch.setnumthreads(opt.threads)
@@ -46,11 +46,11 @@ print 'TOPOGRAPHIC Clustering Learning test on the Berkely background dataset!'
 
 ----------------------------------------------------------------------
 -- loading and processing dataset:
-dofile '1_data.lua'
+paths.dofile '1_data.lua'
 
-filename = '../../datasets/'..paths.basename(opt.datafile)
+filename = paths.basename(opt.datafile)
 if not paths.filep(filename) then
-   os.execute('wget ' .. opt.datafile .. '; '.. 'tar xvf ' .. filename)
+   os.execute('wget ' .. opt.datafile)
 end
 dataset = getdata(filename, opt.inputsize)
 
@@ -68,7 +68,9 @@ for t = 1,trsize do
 end
 
 f256S = trainData.data[{{1,256}}]
-image.display{image=f256S, nrow=16, nrow=16, padding=2, zoom=1, legend='Input images'}
+if opt.visualize then
+    image.display{image=f256S, nrow=16, nrow=16, padding=2, zoom=1, legend='Input images'}
+end
 
 
 -- verify dataset statistics:
@@ -96,34 +98,33 @@ end
 
 -- show a few patches:
 f256S = data1[{{1,256}}]:reshape(256,is,is)
-image.display{image=f256S, nrow=16, nrow=16, padding=2, zoom=2, legend='Patches for 1st layer learning'}
+if opt.visualize then
+    image.display{image=f256S, nrow=16, nrow=16, padding=2, zoom=2, legend='Patches for 1st layer learning'}
+end
 
 print '==> running k-means'
  function cb (kernels1)
     if opt.visualize then
-       win1 = image.display{image=kernels1:reshape(nk1,is,is), padding=1, symmetric=true, 
+       win1 = image.display{image=kernels1:reshape(nk1,is,is), padding=1, symmetric=true,
        zoom=2, win=win1, nrow=math.floor(math.sqrt(nk1)), legend='1st layer filters'}
     end
-end                    
+end
 kernels1 = topokmeans(data1, nk1, nil, opt.initstd1, opt.niter1, 'topo+', cb, true)
- 
+
 -- clear nan kernels if kmeans initstd is not right!
-for i=1,nk1 do   
-   if torch.sum(kernels1[i]-kernels1[i]) ~= 0 then 
-      print('Found NaN kernels!') 
-      kernels1[i] = torch.zeros(kernels1[1]:size()) 
+for i=1,nk1 do
+   if torch.sum(kernels1[i]-kernels1[i]) ~= 0 then
+      print('Found NaN kernels!')
+      kernels1[i] = torch.zeros(kernels1[1]:size())
    end
- 
-   -- normalize kernels to 0 mean and 1 std:  
+
+   -- normalize kernels to 0 mean and 1 std:
 	kernels1[i]:add(-kernels1[i]:mean())
 	kernels1[i]:div(kernels1[i]:std())
 end
 
 -- visualize final kernels:
-image.display{image=kernels1:reshape(nk1,is,is), padding=1, symmetric=true, 
-       zoom=2, win=win1, nrow=math.floor(math.sqrt(nk1)), legend='1st layer filters'}
-
-
-
-
-
+if opt.visualize then
+    image.display{image=kernels1:reshape(nk1,is,is), padding=1, symmetric=true,
+                  zoom=2, win=win1, nrow=math.floor(math.sqrt(nk1)), legend='1st layer filters'}
+end

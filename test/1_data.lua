@@ -2,7 +2,7 @@
 local data_verbose = false
 
 function getdata(datafile, inputsize, std)
-   local data = torch.DiskFile(datafile,'r'):binary():readObject()
+   local data = torch.DiskFile(datafile,'r'):readObject()
    local dataset ={}
 
    local std = std or 0.2
@@ -107,14 +107,14 @@ function getdatacam(inputsize, std)
       --local lmn = torch.conv2(im,gf)
       torch.conv2(lmnsqh,imsq,gfh)
       torch.conv2(lmnsq,lmnsqh,gfv)
-      if data_verbose then         
+      if data_verbose then
          print('lmnsq',lmnsq:min(),lmnsq:max())
       end
 
       lvar:resizeAs(lmn):copy(lmn):cmul(lmn)
       lvar:mul(-1)
       lvar:add(lmnsq)
-      if data_verbose then      
+      if data_verbose then
          print('2',lvar:min(),lvar:max())
       end
 

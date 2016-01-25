@@ -13,12 +13,10 @@ DLL_EXPORT int luaopen_libunsup(lua_State *L)
 {
   lua_newtable(L);
   lua_pushvalue(L, -1);
-  lua_setfield(L, LUA_GLOBALSINDEX, "unsup");
+  lua_setglobal(L, "unsup");
 
   unsup_Floatutil_init(L);
   unsup_Doubleutil_init(L);
 
   return 1;
 }
-
-

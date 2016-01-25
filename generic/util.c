@@ -34,7 +34,7 @@ static const struct luaL_Reg unsup_(util__) [] = {
 static void unsup_(util_init)(lua_State *L)
 {
   luaT_pushmetatable(L, torch_Tensor);
-  luaL_register(L, NULL, unsup_(util__));
+  luaL_setfuncs(L, unsup_(util__), 0);
   lua_pop(L,1);
 }
 
