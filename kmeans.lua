@@ -15,6 +15,7 @@ function unsup.kmeans(x, k, niter, batchsize, callback, verbose)
    local help = 'centroids,count = unsup.kmeans(Tensor(npoints,dim), k [, niter, batchsize, callback, verbose])'
    x = x or error('missing argument: ' .. help)
    k = k or error('missing argument: ' .. help)
+   torch.setdefaulttensortype(x:type())
    niter = niter or 1
    batchsize = batchsize or math.min(1000, (#x)[1])
 
