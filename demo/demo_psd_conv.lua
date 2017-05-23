@@ -1,5 +1,6 @@
 require 'unsup'
 require 'image'
+require 'gnuplot'
 
 dofile 'demo_data.lua'
 
